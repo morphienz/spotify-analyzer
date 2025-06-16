@@ -68,12 +68,17 @@ class PlaylistCreator:
             })
 
             if cached:
-                logger.info(f"🎧 Playlist önbellekten alındı: {name}")
-                return {
-                    "id": cached.get("_id"),
-                    "snapshot_id": cached.get("snapshot_id"),
-                    "external_urls": {"spotify": cached.get("url")}
-                }
+                try:
+                    # Verify that the playlist still exists on Spotify
+                    smart_request_with_retry(self.sp.playlist, cached["_id"])
+                    logger.info(f"🎧 Playlist önbellekten alındı: {name}")
+                    return cached
+                except Exception:
+                    logger.warning(
+                        f"Önbellekteki playlist Spotify'da bulunamadı, yeniden oluşturuluyor: {name}"
+                    )
+                    # Remove stale cache entry
+                    self.collection.delete_one({"_id": cached["_id"]})
 
             playlist = smart_request_with_retry(
                 self.sp.user_playlist_create,
@@ -82,6 +87,14 @@ class PlaylistCreator:
                 public=False,
                 description=description
             )
+
+            # Ensure the playlist is visible in the user's library
+            try:
+                smart_request_with_retry(
+                    self.sp.current_user_follow_playlist, playlist["id"]
+                )
+            except Exception as e:
+                logger.warning(f"Playlist takip işlemi başarısız: {e}")
 
             playlist_doc = {
                 "_id": playlist.get("id", ""),
@@ -94,7 +107,6 @@ class PlaylistCreator:
             }
 
             self.collection.insert_one(playlist_doc)
-
             try:
                 # Follow the playlist so it appears in the user's library
                 smart_request_with_retry(
@@ -102,7 +114,6 @@ class PlaylistCreator:
                 )
             except Exception as e:
                 logger.warning(f"Playlist takip edilemedi: {e}")
-
             return playlist
 
         except Exception as e:
