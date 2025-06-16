@@ -2,8 +2,7 @@ import { Outlet, Link } from 'react-router-dom';
 import { useContext } from 'react';
 import UserMenu from './UserMenu.jsx';
 import { UserContext } from '../UserContext.jsx';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+import { API_BASE_URL } from '../config.js';
 
 function Layout() {
   const { isLoggedIn } = useContext(UserContext);

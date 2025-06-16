@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserMenu from "../components/UserMenu.jsx";
 import PageWrapper from "../components/PageWrapper.jsx";
+import { API_BASE_URL } from "../config.js";
 
 function AnalyzePlaylist() {
   const [playlistUrl, setPlaylistUrl] = useState("");
@@ -20,7 +21,7 @@ function AnalyzePlaylist() {
     setLoading(true);
     setStatus("Analiz başlatılıyor...");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/analyze`, {
+      const res = await fetch(`${API_BASE_URL}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playlist_id: playlistId }),
