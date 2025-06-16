@@ -13,7 +13,7 @@ Create a `.env` file in the `Backend` directory (or set the variables in your en
 Optional variables used by the backend:
 
 - `MONGO_DB` – Mongo database name (default `spotify_analytics`)
-- `FRONTEND_REDIRECT_URI` – URL to redirect after login (default `http://127.0.0.1:5173?login=success`)
+- `FRONTEND_REDIRECT_URI` – URL to redirect after login (default `http://127.0.0.1:5173/callback?login=success`)
 - `HOST` – binding host for the API server (default `0.0.0.0`)
 - `PORT` – binding port for the API server (default `8080`)
 - `DEBUG_MODE` – set to `true` for auto reload
@@ -33,3 +33,19 @@ npm install
 npm run dev
 ```
 This starts the Vite development server, typically reachable at `http://localhost:5173`.
+The frontend expects an API endpoint specified in `Frontend/spotify-analyzer/.env`:
+
+```
+VITE_API_URL=http://127.0.0.1:8080
+```
+
+If your backend is running on a different host or port (for example when using a
+remote container), update `VITE_API_URL` accordingly so that login redirects work
+correctly.
+
+### Available Pages
+
+- `/` – login or start page
+- `/analyze` – choose between liked tracks or playlist analysis
+- `/analyze/liked` – automatically analyze your liked songs
+- `/analyze/playlist` – analyze any playlist by URL or ID

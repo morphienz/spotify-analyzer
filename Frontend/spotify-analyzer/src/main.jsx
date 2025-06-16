@@ -12,7 +12,7 @@ import AnalysisHistory from "./pages/AnalysisHistory.jsx";
 import Layout from "./components/Layout.jsx";
 import { UserProvider } from "./UserContext.jsx";
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <UserProvider>
       <BrowserRouter>

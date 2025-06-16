@@ -6,5 +6,5 @@ export function getApiBaseUrl() {
   const { protocol, hostname } = window.location;
   return `${protocol}//${hostname}:8080`;
 }
-
 export const API_BASE_URL = getApiBaseUrl();
+

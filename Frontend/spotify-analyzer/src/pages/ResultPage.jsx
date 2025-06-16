@@ -85,6 +85,9 @@ function ResultPage() {
   const getCountForGenre = (genre) =>
     genres.find((g) => g.genre === genre)?.count || 0;
 
+  const getCountForGenre = (genre) =>
+    genres.find((g) => g.genre === genre)?.count || 0;
+
   const toggleExclude = (id) => {
     setExcludedTrackIds((prev) =>
       prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
@@ -106,8 +109,6 @@ function ResultPage() {
         selectedTracks[genre].push(id);
       }
     }
-
-
     try {
       const res = await fetch(`${API_BASE_URL}/playlists`, {
         method: "POST",
@@ -160,7 +161,6 @@ function ResultPage() {
           },
           body: JSON.stringify({ analysis_id: analysisId }),
         },
-        
       );
 
       const data = await res.json();

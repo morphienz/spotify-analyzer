@@ -33,6 +33,7 @@ export const createPlaylists = async (analysisId, selectedTracks = {}, excludedT
 export const fetchUserAnalyses = async () => {
   try {
      const response = await fetch(`${API_BASE_URL}/user/analyses`, {
+
       method: "GET",
       mode: "cors",
       credentials: "include",
