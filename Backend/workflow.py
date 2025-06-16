@@ -297,7 +297,7 @@ def get_breakdown_for_analysis(analysis_id: str) -> Dict:
     return get_genre_breakdown(analysis["genres"])
 
 
-def get_analysis_details(analysis_id: str) -> Dict[str, List[Dict]]:
+def get_analysis_details(analysis_id: str) -> List[Dict]:
     analysis = load_analysis(analysis_id)
     if not analysis or "genres" not in analysis:
         raise WorkflowError("Analiz veya tür verisi bulunamadı", "details")
@@ -307,7 +307,6 @@ def get_analysis_details(analysis_id: str) -> Dict[str, List[Dict]]:
     cached_tracks = get_cached_tracks(list(track_id_set))
 
     track_lookup = {t["_id"]: t for t in cached_tracks}
-
     for t in analysis.get("tracks", []):
         tid = t.get("id") or t.get("_id")
         if tid:
@@ -329,7 +328,7 @@ def get_analysis_details(analysis_id: str) -> Dict[str, List[Dict]]:
             for tid in track_ids if tid in track_lookup
         ]
 
-    return genre_details
+    return track_details
 
 
 def get_filtered_genres(analysis_id: str, excluded_ids: List[str]) -> Dict[str, List[str]]:

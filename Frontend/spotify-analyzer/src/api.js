@@ -28,3 +28,23 @@ export const createPlaylists = async (analysisId, selectedTracks = {}, excludedT
   }
 };
 
+export const fetchUserAnalyses = async () => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/analyses`, {
+      method: "GET",
+      mode: "cors",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok || data.status !== "success") {
+      throw new Error(data.detail || data.message || "Analiz geçmişi alınamadı.");
+    }
+
+    return data.data;
+  } catch (err) {
+    console.error("🎯 API history error:", err);
+    throw err;
+  }
+};
+
