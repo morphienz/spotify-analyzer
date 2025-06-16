@@ -71,6 +71,8 @@ export const fetchUserProfile = async () => {
     if (profile.images && profile.images[0]?.url) {
       localStorage.setItem("userImage", profile.images[0].url);
     }
+    // Store full profile for persistence
+    localStorage.setItem("profile", JSON.stringify(profile));
 
     return profile;
   } catch (err) {
