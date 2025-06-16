@@ -5,7 +5,7 @@ import UserMenu from './components/UserMenu.jsx';
 import PageWrapper from './components/PageWrapper.jsx';
 import './index.css';
 import { UserContext } from './UserContext.jsx';
-import { logout as apiLogout } from './api.js';
+import { logout as apiLogout, fetchUserProfile } from './api.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -19,28 +19,36 @@ const slogans = [
 
 function App() {
   const [currentSlogan, setCurrentSlogan] = useState(0);
+  const [feedback, setFeedback] = useState("");
   const { isLoggedIn, setIsLoggedIn, setProfile } = useContext(UserContext);
 
   useEffect(() => {
-  const url = new URL(window.location.href);
-  const loginSuccess = url.searchParams.get("login");
+    const url = new URL(window.location.href);
+    const loginSuccess = url.searchParams.get("login");
 
-  if (loginSuccess === "success") {
-    localStorage.setItem("isLoggedIn", "true");
-    setIsLoggedIn(true);
+    if (loginSuccess === "success") {
+      localStorage.setItem("isLoggedIn", "true");
+      setIsLoggedIn(true);
 
-    // URL'den ?login=success kısmını temizle
-    window.history.replaceState({}, document.title, "/");
-  } else {
-    setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
-  }
+      fetchUserProfile()
+        .then((profile) => setProfile(profile))
+        .catch((e) => console.error("Profile fetch error", e));
 
-  const interval = setInterval(() => {
-    setCurrentSlogan((prev) => (prev + 1) % slogans.length);
-  }, 2500);
+      setFeedback("Giriş başarılı!");
+      setTimeout(() => setFeedback(""), 3000);
 
-  return () => clearInterval(interval);
-}, []);
+      // URL'den ?login=success kısmını temizle
+      window.history.replaceState({}, document.title, "/");
+    } else {
+      setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+    }
+
+    const interval = setInterval(() => {
+      setCurrentSlogan((prev) => (prev + 1) % slogans.length);
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleButtonClick = () => {
     if (isLoggedIn) {
@@ -68,6 +76,9 @@ function App() {
     <PageWrapper>
       <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-black to-gray-900 text-white transition-all duration-500 relative">
       {isLoggedIn && <UserMenu />}
+      {feedback && (
+        <div className="mt-2 text-sm text-green-400">{feedback}</div>
+      )}
       <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-center h-12">
         <span className="text-green-500">{slogans[currentSlogan]}</span>
       </div>

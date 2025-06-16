@@ -4,6 +4,7 @@ import UserMenu from "../components/UserMenu.jsx";
 import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import SelectionPanel from "../components/SelectionPanel";
+import PageWrapper from "../components/PageWrapper.jsx";
 
 function ResultPage() {
   const { analysisId } = useParams();
