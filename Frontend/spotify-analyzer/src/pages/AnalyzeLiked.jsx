@@ -58,6 +58,7 @@ function AnalyzeLiked() {
   }, [navigate]);
 
   return (
+    <PageWrapper>
     <div className="flex flex-col items-center justify-center h-screen text-white bg-black px-4 relative">
       <UserMenu />
       <div className="text-xl mb-4 text-center">{status}</div>

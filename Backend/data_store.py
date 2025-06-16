@@ -10,7 +10,7 @@ from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_excep
 from dotenv import load_dotenv
 import atexit
 from threading import Lock
-from bson import ObjectId
+from bson import ObjectId, errors as bson_errors
 from utils import chunk_list, validate_track_ids
 
 # --- Konfigürasyonlar ---
@@ -199,8 +199,12 @@ def save_analysis(data: Dict) -> Optional[str]:
 def load_analysis(analysis_id: str) -> Optional[Dict]:
     try:
         collection = MongoDBManager().get_collection("analyses")
-        result = collection.find_one({'_id': ObjectId(analysis_id)})
+        obj_id = ObjectId(analysis_id)
+        result = collection.find_one({'_id': obj_id})
         return result if result else None
+    except (bson_errors.InvalidId, TypeError, ValueError) as e:
+        logger.error(f"Geçersiz analiz ID: {str(e)}")
+        return None
     except errors.PyMongoError as e:
         logger.error(f"Analiz yükleme hatası: {str(e)}")
         return None

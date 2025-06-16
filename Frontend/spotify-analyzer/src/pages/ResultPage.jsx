@@ -173,6 +173,7 @@ function ResultPage() {
   };
 
   return (
+    <PageWrapper>
     <div className="bg-[#121212] text-white min-h-screen flex flex-col items-center py-10 px-4 relative">
       <UserMenu />
       <h1 className="text-3xl font-bold mb-6">Analiz Sonuçları</h1>

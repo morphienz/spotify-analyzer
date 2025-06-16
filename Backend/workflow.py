@@ -328,7 +328,7 @@ def get_analysis_details(analysis_id: str) -> List[Dict]:
             for tid in track_ids if tid in track_lookup
         ]
 
-    return track_details
+    return genre_details
 
 
 def get_filtered_genres(analysis_id: str, excluded_ids: List[str]) -> Dict[str, List[str]]:
@@ -369,14 +369,9 @@ def get_user_analysis_history(user_id: str) -> List[Dict]:
 # --- CLI Test ---
 if __name__ == "__main__":
     try:
-        asyncio.run(run_workflow(max_tracks=100, confirmation=True))
+        results = asyncio.run(run_workflow(max_tracks=100, confirmation=True))
         print("\n" + "=" * 50)
         print(f"{' SPOTİFY TÜR ORGANİZATÖRÜ ':=^50}")
-
-        results = run_workflow(
-            max_tracks=100,
-            confirmation=True
-        )
 
         print_summary(results)
 
