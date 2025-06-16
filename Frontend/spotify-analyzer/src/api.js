@@ -48,3 +48,53 @@ export const fetchUserAnalyses = async () => {
   }
 };
 
+export const fetchUserProfile = async () => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/profile`, {
+      method: "GET",
+      mode: "cors",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || data.status !== "success") {
+      throw new Error(data.detail || data.message || "Profil alınamadı.");
+    }
+
+    const profile = data.data || {};
+    if (profile.display_name) {
+      localStorage.setItem("userName", profile.display_name);
+    }
+    if (profile.images && profile.images[0]?.url) {
+      localStorage.setItem("userImage", profile.images[0].url);
+    }
+
+    return profile;
+  } catch (err) {
+    console.error("🎯 API profile error:", err);
+    throw err;
+  }
+};
+
+export const logout = async () => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
+      method: "POST",
+      mode: "cors",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || data.status !== "success") {
+      throw new Error(data.detail || data.message || "Çıkış başarısız.");
+    }
+
+    return data;
+  } catch (err) {
+    console.error("🎯 API logout error:", err);
+    throw err;
+  }
+};
+
