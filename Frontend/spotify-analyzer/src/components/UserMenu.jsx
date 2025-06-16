@@ -35,6 +35,8 @@ function UserMenu() {
       localStorage.removeItem("isLoggedIn");
       setIsLoggedIn(false);
       setProfile(null);
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userImage");
       navigate("/");
     }
   };

@@ -69,7 +69,11 @@ class PlaylistCreator:
 
             if cached:
                 logger.info(f"🎧 Playlist önbellekten alındı: {name}")
-                return cached
+                return {
+                    "id": cached.get("_id"),
+                    "snapshot_id": cached.get("snapshot_id"),
+                    "external_urls": {"spotify": cached.get("url")}
+                }
 
             playlist = smart_request_with_retry(
                 self.sp.user_playlist_create,
