@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
+import SelectionPanel from "../components/SelectionPanel";
 
 function ResultPage() {
   const { analysisId } = useParams();
   const [genres, setGenres] = useState([]);
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [genreTrackMap, setGenreTrackMap] = useState({});
+  const [excludedTrackIds, setExcludedTrackIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -43,14 +45,7 @@ function ResultPage() {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/analysis/${analysisId}/details`);
         const { data, status } = await res.json();
         if (status === "success") {
-          const mapping = {};
-          for (const track of data.tracks || []) {
-            for (const genre of track.genres || []) {
-              if (!mapping[genre]) mapping[genre] = [];
-              mapping[genre].push(track.id);
-            }
-          }
-          setGenreTrackMap(mapping);
+          setGenreTrackMap(data);
         }
       } catch (err) {
         console.error("❌ Details fetch error:", err);
@@ -68,10 +63,18 @@ function ResultPage() {
     );
   };
 
+  const toggleExclude = (id) => {
+    setExcludedTrackIds((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+    );
+  };
+
   const handleCreatePlaylist = async () => {
     const selectedTracks = {};
     for (const genre of selectedGenres) {
-      selectedTracks[genre] = genreTrackMap[genre] || [];
+      selectedTracks[genre] = (genreTrackMap[genre] || [])
+        .filter((t) => !excludedTrackIds.includes(t.id))
+        .map((t) => t.id);
     }
 
     try {
@@ -84,7 +87,7 @@ function ResultPage() {
           analysis_id: analysisId,
           confirmation: true,
           selected_tracks: selectedTracks,
-          excluded_track_ids: [],
+          excluded_track_ids: excludedTrackIds,
         }),
       });
 
@@ -195,6 +198,13 @@ function ResultPage() {
               ))}
             </div>
           </div>
+
+          <SelectionPanel
+            genres={genreTrackMap}
+            selectedGenres={new Set(selectedGenres)}
+            excludedTrackIds={excludedTrackIds}
+            toggleExclude={toggleExclude}
+          />
 
           <button
             onClick={handleCreatePlaylist}
