@@ -178,8 +178,10 @@ class RateLimiter:
     """Rate limit yönetimi için yardımcı sınıf"""
 
     def __init__(self, calls: int, period: int):
-        self.calls = calls
-        self.period = period
+        env_calls = os.getenv("RATE_LIMIT_CALLS")
+        env_period = os.getenv("RATE_LIMIT_PERIOD")
+        self.calls = int(env_calls) if env_calls is not None else calls
+        self.period = int(env_period) if env_period is not None else period
         self.timestamps = []
 
     def __call__(self, func: Callable) -> Callable:

@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 # --- Ayarlar ---
 MAX_TRACKS = int(os.getenv("MAX_TRACKS", 5000))
 DEFAULT_CHUNK_SIZE = 100
-REQUEST_DELAY = 0.2
+REQUEST_DELAY = float(os.getenv("WORKFLOW_REQUEST_DELAY", 0.2))
 MAX_WORKERS = int(os.getenv("WORKFLOW_MAX_WORKERS", 5))
 
 # --- Retry Ayarları ---
