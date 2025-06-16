@@ -1,33 +1,55 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 function UserMenu() {
   const [open, setOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
+  const ref = useRef(null);
+  const navigate = useNavigate();
+
+  const name = localStorage.getItem('userName') || 'Kullanıcı';
+  const image =
+    localStorage.getItem('userImage') ||
+    'https://via.placeholder.com/32';
 
   useEffect(() => {
-    setLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
   }, []);
 
-  if (!loggedIn) return null;
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    navigate('/');
+  };
 
   return (
-    <div className="absolute top-4 right-4 text-right">
+    <div className="relative" ref={ref}>
       <button
-        onClick={() => setOpen((o) => !o)}
-        className="px-3 py-1 bg-gray-800 text-white rounded"
+        className="flex items-center gap-2 focus:outline-none"
+        onClick={() => setOpen(!open)}
       >
-        ☰
+        <img src={image} alt="User" className="w-8 h-8 rounded-full" />
+        <span className="text-sm font-medium">{name}</span>
       </button>
       {open && (
-        <div className="mt-2 bg-gray-900 text-white rounded shadow-lg p-2">
+        <div className="absolute right-0 mt-2 w-40 bg-gray-800 text-white rounded shadow-lg z-10">
           <Link
             to="/history"
+            className="block px-4 py-2 hover:bg-gray-700"
             onClick={() => setOpen(false)}
-            className="block px-4 py-2 hover:bg-gray-700 rounded"
           >
-            Analiz Geçmişi
+            Geçmiş Analizler
           </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full text-left px-4 py-2 hover:bg-gray-700"
+          >
+            Çıkış Yap
+          </button>
         </div>
       )}
     </div>
