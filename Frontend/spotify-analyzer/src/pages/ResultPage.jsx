@@ -33,6 +33,7 @@ function ResultPage() {
           const genreList = Object.entries(data).map(([genre, value]) => ({
             genre,
             percentage: value.percentage,
+            count: value.count,
           }));
           setGenres(genreList);
         } else {
@@ -80,6 +81,9 @@ function ResultPage() {
       prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre],
     );
   };
+
+  const getCountForGenre = (genre) =>
+    genres.find((g) => g.genre === genre)?.count || 0;
 
   const toggleExclude = (id) => {
     setExcludedTrackIds((prev) =>
@@ -242,6 +246,17 @@ function ResultPage() {
                   </span>
                 ))}
               </div>
+              {selectedGenres.length > 0 ? (
+                <ul className="mt-2 text-sm text-gray-300">
+                  {selectedGenres.map((g) => (
+                    <li key={g}>{g}: {getCountForGenre(g)} şarkı</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-sm text-gray-400">
+                  Grafikte bir türe tıklayarak şarkı sayısını görebilirsin.
+                </p>
+              )}
             </div>
 
             <SelectionPanel
