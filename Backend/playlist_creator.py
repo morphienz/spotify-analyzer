@@ -89,6 +89,15 @@ class PlaylistCreator:
             }
 
             self.collection.insert_one(playlist_doc)
+
+            try:
+                # Follow the playlist so it appears in the user's library
+                smart_request_with_retry(
+                    self.sp.current_user_follow_playlist, playlist["id"]
+                )
+            except Exception as e:
+                logger.warning(f"Playlist takip edilemedi: {e}")
+
             return playlist
 
         except Exception as e:
