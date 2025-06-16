@@ -117,7 +117,12 @@ def auth_callback(code: str):
         token_info = auth_manager._add_metadata(token_info)
         auth_manager._save_token(token_info)
 
-        return RedirectResponse(url=os.getenv("FRONTEND_REDIRECT_URI", "http://127.0.0.1:5173?login=success"))
+        return RedirectResponse(
+            url=os.getenv(
+                "FRONTEND_REDIRECT_URI",
+                "http://127.0.0.1:5173/callback?login=success",
+            )
+        )
     except Exception as e:
         logger.error(f"Auth callback hatası: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Authentication failed")

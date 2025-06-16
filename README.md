@@ -13,7 +13,7 @@ Create a `.env` file in the `Backend` directory (or set the variables in your en
 Optional variables used by the backend:
 
 - `MONGO_DB` – Mongo database name (default `spotify_analytics`)
-- `FRONTEND_REDIRECT_URI` – URL to redirect after login (default `http://127.0.0.1:5173?login=success`)
+- `FRONTEND_REDIRECT_URI` – URL to redirect after login (default `http://127.0.0.1:5173/callback?login=success`)
 - `HOST` – binding host for the API server (default `0.0.0.0`)
 - `PORT` – binding port for the API server (default `8080`)
 - `DEBUG_MODE` – set to `true` for auto reload
