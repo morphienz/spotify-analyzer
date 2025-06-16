@@ -2,7 +2,7 @@ import { Outlet, Link } from 'react-router-dom';
 import { useContext } from 'react';
 import UserMenu from './UserMenu.jsx';
 import { UserContext } from '../UserContext.jsx';
-import { fetchAuthUrl } from '../api.js';
+import { API_BASE_URL } from '../config.js';
 
 function Layout() {
   const { isLoggedIn } = useContext(UserContext);
@@ -13,15 +13,12 @@ function Layout() {
         {isLoggedIn ? (
           <UserMenu />
         ) : (
-          <button
-            onClick={async () => {
-              const url = await fetchAuthUrl();
-              window.location.href = url;
-            }}
+          <a
+            href={`${API_BASE_URL}/login`}
             className="text-sm bg-green-500 hover:bg-green-600 text-black font-semibold py-1 px-3 rounded"
           >
             Giriş Yap
-          </button>
+          </a>
         )}
       </header>
       <main className="pt-16">
