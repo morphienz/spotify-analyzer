@@ -369,14 +369,9 @@ def get_user_analysis_history(user_id: str) -> List[Dict]:
 # --- CLI Test ---
 if __name__ == "__main__":
     try:
-        asyncio.run(run_workflow(max_tracks=100, confirmation=True))
+        results = asyncio.run(run_workflow(max_tracks=100, confirmation=True))
         print("\n" + "=" * 50)
         print(f"{' SPOTİFY TÜR ORGANİZATÖRÜ ':=^50}")
-
-        results = run_workflow(
-            max_tracks=100,
-            confirmation=True
-        )
 
         print_summary(results)
 
