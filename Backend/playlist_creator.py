@@ -101,11 +101,19 @@ class PlaylistCreator:
                 "name": name,
                 "owner": self.user_id,
                 "tracks": [],
+                "url": playlist.get("external_urls", {}).get("spotify"),
                 "created_at": datetime.utcnow(),
                 "expires_at": datetime.utcnow() + timedelta(days=CACHE_TTL_DAYS)
             }
 
             self.collection.insert_one(playlist_doc)
+            try:
+                # Follow the playlist so it appears in the user's library
+                smart_request_with_retry(
+                    self.sp.current_user_follow_playlist, playlist["id"]
+                )
+            except Exception as e:
+                logger.warning(f"Playlist takip edilemedi: {e}")
             return playlist
 
         except Exception as e:
@@ -171,11 +179,16 @@ class PlaylistCreator:
                     # Şarkı ekleme
                     success, count = await asyncio.to_thread(self._add_tracks_safe, playlist["id"], filtered_ids)
 
+                    if count == 0:
+                        logger.warning(f"{genre} türü için şarkılar eklenemedi, playlist boş olabilir.")
+                    else:
+                        logger.info(f"{genre} türü playlistine {count} şarkı eklendi")
+
                     results[genre] = {
                         "playlist_id": playlist["id"],
                         "track_count": count,
                         "snapshot_id": playlist.get("snapshot_id", "unknown"),
-                        "url": playlist.get("external_urls", {}).get("spotify", "#")
+                        "url": playlist.get("external_urls", {}).get("spotify") or playlist.get("url", "#")
                     }
 
                     # MongoDB kayıt
