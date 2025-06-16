@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PageWrapper from '../components/PageWrapper.jsx';
 
 function CallbackPage() {
   const navigate = useNavigate();
@@ -23,9 +24,11 @@ function CallbackPage() {
   }, [navigate]);
 
   return (
-    <div className="flex items-center justify-center h-screen bg-[#191414] text-white text-xl">
-      Spotify hesabınız bağlandı, yönlendiriliyorsunuz...
-    </div>
+    <PageWrapper>
+      <div className="flex items-center justify-center h-screen bg-[#191414] text-white text-xl">
+        Spotify hesabınız bağlandı, yönlendiriliyorsunuz...
+      </div>
+    </PageWrapper>
   );
 }
 

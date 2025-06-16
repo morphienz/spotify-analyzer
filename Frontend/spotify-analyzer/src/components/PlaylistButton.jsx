@@ -55,7 +55,7 @@ function PlaylistButton({
       <button
         onClick={handleCreatePlaylist}
         disabled={loading || selectedGenres.size === 0}
-        className={`px-6 py-3 rounded-full font-bold text-lg transition-all ${
+        className={`px-6 py-3 rounded-full font-bold text-lg transition duration-300 ease-in-out ${
           loading
             ? "bg-gray-700 cursor-not-allowed"
             : "bg-green-500 hover:bg-green-600 text-black"

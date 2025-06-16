@@ -1,6 +1,8 @@
 // App.jsx
 import { useEffect, useState } from 'react';
-import { spotifyGreen } from './assets/colors';
+import { motion } from 'framer-motion';
+import UserMenu from './components/UserMenu.jsx';
+import PageWrapper from './components/PageWrapper.jsx';
 import './index.css';
 
 const slogans = [
@@ -46,17 +48,22 @@ function App() {
   };
 
   return (
+    <PageWrapper>
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-black to-gray-900 text-white transition-all duration-500">
+      <div className="absolute top-4 right-4">{isLoggedIn && <UserMenu />}</div>
       <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-center h-12">
         <span className="text-green-500">{slogans[currentSlogan]}</span>
       </div>
-      <button
+      <motion.button
         onClick={handleButtonClick}
-        className="bg-green-500 hover:bg-green-600 text-black font-bold py-3 px-6 rounded-full text-lg transition-all duration-300 shadow-lg"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="bg-green-500 hover:bg-green-600 text-black font-bold py-3 px-6 rounded-full text-lg transition duration-300 ease-in-out shadow-lg"
       >
         {isLoggedIn ? "Analiz Et" : "Giriş Yap"}
-      </button>
+      </motion.button>
     </div>
+    </PageWrapper>
   );
 }
 
