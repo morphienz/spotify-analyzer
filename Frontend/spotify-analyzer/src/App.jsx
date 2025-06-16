@@ -1,7 +1,9 @@
 // App.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { spotifyGreen } from './assets/colors';
 import './index.css';
+import { UserContext } from './UserContext.jsx';
+import { logout as apiLogout } from './api.js';
 
 const slogans = [
   "Türlerin ötesine geç!",
@@ -13,7 +15,7 @@ const slogans = [
 
 function App() {
   const [currentSlogan, setCurrentSlogan] = useState(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, setIsLoggedIn, setProfile } = useContext(UserContext);
 
   useEffect(() => {
   const url = new URL(window.location.href);
@@ -45,6 +47,19 @@ function App() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await apiLogout();
+    } catch (e) {
+      console.error("Logout failed", e);
+    } finally {
+      localStorage.removeItem("isLoggedIn");
+      setIsLoggedIn(false);
+      setProfile(null);
+      window.location.href = "/";
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-black to-gray-900 text-white transition-all duration-500">
       <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-center h-12">
@@ -56,6 +71,14 @@ function App() {
       >
         {isLoggedIn ? "Analiz Et" : "Giriş Yap"}
       </button>
+      {isLoggedIn && (
+        <button
+          onClick={handleLogout}
+          className="mt-4 text-sm text-gray-300 underline"
+        >
+          Çıkış Yap
+        </button>
+      )}
     </div>
   );
 }
