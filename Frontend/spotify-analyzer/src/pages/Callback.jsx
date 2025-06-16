@@ -1,4 +1,4 @@
-import { useEffect, useContext } from 'react';
+import { useEffect, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchUserProfile } from '../api.js';
 import { UserContext } from '../UserContext.jsx';
@@ -7,6 +7,7 @@ import PageWrapper from '../components/PageWrapper.jsx';
 function CallbackPage() {
   const navigate = useNavigate();
   const { setIsLoggedIn, setProfile } = useContext(UserContext);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -21,19 +22,19 @@ function CallbackPage() {
         .catch((e) => console.error("Profile fetch error", e))
         .finally(() => {
           setTimeout(() => {
-            navigate('/');
+            navigate('/analyze');
           }, 1000);
         });
     } else {
-      // Hatalı yönlendirme olursa hata sayfasına gönder
-      navigate('/error'); // varsa
+      const errorMsg = params.get('error') || 'Giriş başarısız';
+      setError(errorMsg);
     }
   }, [navigate, setIsLoggedIn, setProfile]);
 
   return (
     <PageWrapper>
       <div className="flex items-center justify-center h-screen bg-[#191414] text-white text-xl">
-        Spotify hesabınız bağlandı, yönlendiriliyorsunuz...
+        {error ? `Hata: ${error}` : 'Spotify hesabınız bağlandı, yönlendiriliyorsunuz...'}
       </div>
     </PageWrapper>
   );
