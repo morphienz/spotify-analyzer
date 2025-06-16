@@ -28,3 +28,28 @@ export const createPlaylists = async (analysisId, selectedTracks = {}, excludedT
   }
 };
 
+export const fetchUserProfile = async () => {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/user/profile`, {
+    credentials: "include",
+    mode: "cors",
+  });
+  const data = await response.json();
+  if (!response.ok || data.status === "error") {
+    throw new Error(data.error?.message || "Profil alınamadı.");
+  }
+  return data.data;
+};
+
+export const logout = async () => {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
+    method: "POST",
+    credentials: "include",
+    mode: "cors",
+  });
+  const data = await response.json();
+  if (!response.ok || data.status === "error") {
+    throw new Error(data.error?.message || "Çıkış yapılamadı.");
+  }
+  return data.data;
+};
+

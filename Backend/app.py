@@ -362,6 +362,21 @@ async def list_user_analyses():
     except Exception as e:
         return ApiResponseFormatter.error(e)
 
+@app.get("/user/profile")
+async def get_user_profile():
+    """Return basic profile information for the logged in user."""
+    try:
+        sp = get_spotify_client()
+        profile = smart_request_with_retry(sp.me)
+        data = {
+            "display_name": profile.get("display_name"),
+            "id": profile.get("id"),
+            "images": profile.get("images"),
+        }
+        return ApiResponseFormatter.success(data)
+    except Exception as e:
+        return ApiResponseFormatter.error(e)
+
 @app.get("/progress/{analysis_id}")
 async def get_analysis_progress(analysis_id: str):
     try:
@@ -371,6 +386,15 @@ async def get_analysis_progress(analysis_id: str):
             "status": "completed",
             "progress": 100
         })
+    except Exception as e:
+        return ApiResponseFormatter.error(e)
+
+@app.post("/logout")
+async def logout_user():
+    """Clear stored Spotify tokens and log the user out."""
+    try:
+        auth_manager.clear_tokens()
+        return ApiResponseFormatter.success({"message": "Logout successful"})
     except Exception as e:
         return ApiResponseFormatter.error(e)
 

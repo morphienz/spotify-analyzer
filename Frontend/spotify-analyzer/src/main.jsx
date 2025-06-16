@@ -9,7 +9,22 @@ import AnalyzeOptions from './pages/AnalyzeOptions.jsx'
 import AnalyzeLiked from './pages/AnalyzeLiked.jsx'
 import ResultPage from './pages/ResultPage.jsx'
 import AnalyzePage from './pages/AnalyzePage.jsx'
+import { UserProvider } from './UserContext.jsx'
 
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <UserProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="/callback" element={<Callback />} />
+          <Route path="/analyze" element={<AnalyzeOptions />} />
+          <Route path="/analyze/liked" element={<AnalyzeLiked />} />
+          <Route path="/result/:analysisId" element={<ResultPage />} />
+          <Route path="/analyze/result/:analysisId" element={<AnalyzePage />} />
+        </Routes>
+      </BrowserRouter>
+    </UserProvider>
 function AnimatedRoutes() {
   const location = useLocation();
   return (
