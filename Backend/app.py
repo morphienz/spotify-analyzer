@@ -357,6 +357,8 @@ async def logout_user(response: Response, request: Request):
     try:
         user_id = request.cookies.get("spotify_user_id")
         auth_manager.clear_tokens(user_id)
+        # clear current user so a new user can log in
+        auth_manager.set_current_user(None)
         response.delete_cookie("spotify_user_id")
         return ApiResponseFormatter.success({"message": "Logout successful"})
     except Exception as e:
