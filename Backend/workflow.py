@@ -99,7 +99,8 @@ def get_user_tracks(sp: spotipy.Spotify, max_tracks: int = MAX_TRACKS) -> List[D
                     "id": item["track"]["id"],
                     "name": item["track"]["name"],
                     "artist": item["track"]["artists"][0]["name"],
-                    "added_at": item["added_at"]
+                    "added_at": item["added_at"],
+                    "preview_url": item["track"].get("preview_url")
                 } for item in results.get("items", []) if item.get("track")
             ]
 
@@ -306,26 +307,26 @@ def get_analysis_details(analysis_id: str) -> List[Dict]:
     cached_tracks = get_cached_tracks(list(track_id_set))
 
     track_lookup = {t["_id"]: t for t in cached_tracks}
+    for t in analysis.get("tracks", []):
+        tid = t.get("id") or t.get("_id")
+        if tid:
+            track_lookup.setdefault(tid, {}).update({
+                "name": t.get("name"),
+                "artist": t.get("artist"),
+                "preview_url": t.get("preview_url")
+            })
 
-    # Hangi şarkının hangi türlere ait olduğunu haritalandır
-    track_genres = {tid: [] for tid in track_id_set}
+    genre_details = {}
     for genre, track_ids in genre_map.items():
-        for tid in track_ids:
-            if tid in track_genres:
-                track_genres[tid].append(genre)
-
-    # Nihai şarkı listesi
-    track_details = []
-    for tid, genres in track_genres.items():
-        if tid not in track_lookup:
-            continue
-        info = track_lookup[tid]
-        track_details.append({
-            "id": tid,
-            "name": info.get("name", "Unknown"),
-            "artist": info.get("artist", "Unknown"),
-            "genres": genres
-        })
+        genre_details[genre] = [
+            {
+                "id": tid,
+                "name": track_lookup.get(tid, {}).get("name", "Unknown"),
+                "artist": track_lookup.get(tid, {}).get("artist", "Unknown"),
+                "preview_url": track_lookup.get(tid, {}).get("preview_url")
+            }
+            for tid in track_ids if tid in track_lookup
+        ]
 
     return track_details
 

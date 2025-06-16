@@ -29,10 +29,17 @@ function SelectionPanel({
                     : "bg-gray-900 border-gray-700"
                 }`}
               >
-                <div>
+                <div className="flex-1">
                   <div className="font-medium">{track.name}</div>
                   <div className="text-sm text-gray-400">{track.artist}</div>
                 </div>
+                {track.preview_url && (
+                  <audio
+                    controls
+                    src={track.preview_url}
+                    className="w-32 mr-2"
+                  />
+                )}
                 <button
                   onClick={() => toggleExclude(track.id)}
                   className={`text-sm font-bold px-3 py-1 rounded-full ${
