@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import UserMenu from "../components/UserMenu.jsx";
 
 function AnalyzePage() {
   const [status, setStatus] = useState("Hazırlanıyor...");
@@ -45,7 +46,8 @@ function AnalyzePage() {
   }, [navigate]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen text-white bg-black">
+    <div className="flex flex-col items-center justify-center h-screen text-white bg-black relative">
+      <UserMenu />
       <div className="text-xl mb-4">{status}</div>
       <div className="w-1/2 h-4 bg-gray-700 rounded">
         <div

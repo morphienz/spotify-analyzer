@@ -8,6 +8,7 @@ import AnalyzeOptions from './pages/AnalyzeOptions.jsx'
 import AnalyzeLiked from './pages/AnalyzeLiked.jsx'
 import ResultPage from './pages/ResultPage.jsx'
 import AnalyzePage from './pages/AnalyzePage.jsx'
+import AnalysisHistory from './pages/AnalysisHistory.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -19,6 +20,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/analyze/liked" element={<AnalyzeLiked />} />
         <Route path="/result/:analysisId" element={<ResultPage />} />
         <Route path="/analyze/result/:analysisId" element={<AnalyzePage />} />
+        <Route path="/history" element={<AnalysisHistory />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
