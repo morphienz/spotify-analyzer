@@ -66,6 +66,8 @@ function App() {
       console.error("Logout failed", e);
     } finally {
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userImage");
       setIsLoggedIn(false);
       setProfile(null);
       window.location.href = "/";
