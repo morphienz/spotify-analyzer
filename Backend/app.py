@@ -339,7 +339,7 @@ async def get_analysis_breakdown(analysis_id: str):
 async def get_analysis_details_endpoint(analysis_id: str):
     try:
         details = get_analysis_details(analysis_id)
-        return ApiResponseFormatter.success(details)
+        return ApiResponseFormatter.success({"tracks": details})
     except Exception as e:
         return ApiResponseFormatter.error(e)
 

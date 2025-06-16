@@ -40,11 +40,13 @@ function ResultPage() {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/analysis/${analysisId}/details`);
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/analysis/${analysisId}/details`
+        );
         const { data, status } = await res.json();
-        if (status === "success") {
+        if (status === "success" && Array.isArray(data.tracks)) {
           const mapping = {};
-          for (const track of data.tracks || []) {
+          for (const track of data.tracks) {
             for (const genre of track.genres || []) {
               if (!mapping[genre]) mapping[genre] = [];
               mapping[genre].push(track.id);
