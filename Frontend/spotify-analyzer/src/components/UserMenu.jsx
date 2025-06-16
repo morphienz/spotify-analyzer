@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout as apiLogout, fetchAuthUrl } from "../api.js";
+import { logout as apiLogout } from "../api.js";
+import { API_BASE_URL } from "../config.js";
 import { UserContext } from "../UserContext.jsx";
 
 function UserMenu() {
@@ -43,15 +44,12 @@ function UserMenu() {
     
   if (!isLoggedIn) {
     return (
-      <button
-        onClick={async () => {
-          const url = await fetchAuthUrl();
-          window.location.href = url;
-        }}
+      <a
+        href={`${API_BASE_URL}/login`}
         className="px-4 py-2 bg-green-500 text-black rounded-full"
       >
         Giriş Yap
-      </button>
+      </a>
     );
   }
 
