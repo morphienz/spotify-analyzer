@@ -20,7 +20,7 @@ const slogans = [
 
 function App() {
   const [currentSlogan, setCurrentSlogan] = useState(0);
-  const [feedback, setFeedback] = useState("");
+  const [loginMessage, setLoginMessage] = useState("");
   const { isLoggedIn, setIsLoggedIn, setProfile } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -28,34 +28,42 @@ function App() {
     const url = new URL(window.location.href);
     const loginSuccess = url.searchParams.get("login");
 
-    if (loginSuccess === "success") {
+  const loggedIn =
+      loginSuccess === "success" || localStorage.getItem("isLoggedIn") === "true";
+
+    if (loggedIn) {
       localStorage.setItem("isLoggedIn", "true");
       setIsLoggedIn(true);
-
       fetchUserProfile()
-        .then((profile) => setProfile(profile))
+        .then((p) => setProfile(p))
         .catch((e) => console.error("Profile fetch error", e));
 
-      setFeedback("Giriş başarılı!");
-      setTimeout(() => setFeedback(""), 3000);
-
-      // URL'den ?login=success kısmını temizle
-      window.history.replaceState({}, document.title, "/");
+  if (loginSuccess === "success") {
+        setLoginMessage("Giriş başarılı!");
+      }
     } else {
-      setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+      setIsLoggedIn(false);
+    }
+
+    if (loginSuccess) {
+      window.history.replaceState({}, document.title, "/");
     }
 
     const interval = setInterval(() => {
       setCurrentSlogan((prev) => (prev + 1) % slogans.length);
     }, 2500);
-
     return () => clearInterval(interval);
-  }, []);
+  }, [setIsLoggedIn, setProfile]);
+
+  useEffect(() => {
+    if (!loginMessage) return;
+    const t = setTimeout(() => setLoginMessage(""), 3000);
+    return () => clearTimeout(t);
+  }, [loginMessage]);
 
   const handleButtonClick = () => {
     if (isLoggedIn) {
-      // Navigate without full reload
-      navigate("/analyze/liked");
+      navigate("/analyze");
     } else {
       window.location.href = `${API_BASE_URL}/login`;
     }
@@ -70,7 +78,6 @@ function App() {
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("userName");
       localStorage.removeItem("userImage");
-      localStorage.removeItem("profile");
       setIsLoggedIn(false);
       setProfile(null);
       window.location.href = "/";
@@ -81,8 +88,8 @@ function App() {
     <PageWrapper>
       <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-black to-gray-900 text-white transition-all duration-500 relative">
       {isLoggedIn && <UserMenu />}
-      {feedback && (
-        <div className="mt-2 text-sm text-green-400">{feedback}</div>
+      {loginMessage && (
+        <div className="absolute top-20 text-green-400">{loginMessage}</div>
       )}
       <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-center h-12">
         <span className="text-green-500">{slogans[currentSlogan]}</span>

@@ -1,14 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { logout as apiLogout } from "../api.js";
+import { UserContext } from "../UserContext.jsx";
 
 function UserMenu() {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const navigate = useNavigate();
+  const { isLoggedIn, setIsLoggedIn, profile, setProfile } = useContext(UserContext);
 
-  const name = localStorage.getItem("userName") || "Kullanıcı";
-  const image = localStorage.getItem("userImage") || "/vite.svg";
+  const name =
+    profile?.display_name || localStorage.getItem("userName") || "Kullanıcı";
+  const image =
+    (profile?.images && profile.images[0]?.url) ||
+    localStorage.getItem("userImage") ||
+    "/vite.svg";
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -27,9 +33,26 @@ function UserMenu() {
       console.error("Logout failed", e);
     } finally {
       localStorage.removeItem("isLoggedIn");
+      setIsLoggedIn(false);
+      setProfile(null);
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userImage");
       navigate("/");
     }
   };
+
+  if (!isLoggedIn) {
+    return (
+      <button
+        onClick={() => {
+          window.location.href = `${import.meta.env.VITE_API_URL}/login`;
+        }}
+        className="px-4 py-2 bg-green-500 text-black rounded-full"
+      >
+        Giriş Yap
+      </button>
+    );
+  }
 
   return (
     <div className="relative" ref={ref}>
