@@ -48,7 +48,11 @@ class SpotifyAuthManager:
             cache_path=None  # MongoDB kullanıldığı için devre dışı
         )
         self.mongo = MongoDBManager()
-        self.current_user = None
+        self.current_user: Optional[str] = None
+
+        def set_current_user(self, user_id: str | None):
+            """Geçerli kullanıcıyı ayarla"""
+            self.current_user = user_id
 
     @retry(**RETRY_CONFIG)
     def get_valid_client(self) -> spotipy.Spotify:
@@ -66,19 +70,20 @@ class SpotifyAuthManager:
     @retry(**RETRY_CONFIG)
     def _load_token(self) -> Optional[Dict]:
         """Token'ı MongoDB'den yükler"""
+        if not self.current_user:
+            return None
         collection = self.mongo.get_collection(TOKEN_COLLECTION)
-        return collection.find_one({"_id": "current_user"})
+        return collection.find_one({"_id": self.current_user})
 
     @retry(**RETRY_CONFIG)
-    def _save_token(self, token_info: Dict) -> None:
+    def _save_token(self, token_info: Dict, user_id: Optional[str] = None) -> None:
         """Token'ı MongoDB'ye kaydeder"""
         collection = self.mongo.get_collection(TOKEN_COLLECTION)
-        token_info['_id'] = "current_user"
-        collection.replace_one(
-            {"_id": "current_user"},
-            token_info,
-            upsert=True
-        )
+        uid = user_id or self.current_user
+        if not uid:
+            raise ValueError("User ID bilinmiyor")
+        token_info['_id'] = uid
+        collection.replace_one({"_id": uid}, token_info, upsert=True)
         logger.info("Token MongoDB'ye kaydedildi")
 
     def _is_token_expired(self, token_info: Dict) -> bool:
@@ -105,11 +110,13 @@ class SpotifyAuthManager:
         token_info['expires_at'] = int(token_info['expires_in']) + int(datetime.now().timestamp())
         return token_info
 
-    def clear_tokens(self) -> bool:
-        """Tüm token'ları temizler"""
+    def clear_tokens(self, user_id: Optional[str] = None) -> bool:
+        """Belirtilen kullanıcının token'ını temizler"""
         try:
             collection = self.mongo.get_collection(TOKEN_COLLECTION)
-            result = collection.delete_many({})
+            uid = user_id or self.current_user
+            query = {"_id": uid} if uid else {}
+            result = collection.delete_many(query)
             logger.info(f"{result.deleted_count} token silindi")
             return True
         except PyMongoError as e:
