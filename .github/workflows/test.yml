@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install backend dependencies
+        run: python3 -m pip install -r Backend/requirements.txt
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install frontend dependencies
+        working-directory: Frontend/spotify-analyzer
+        run: npm install
+      - name: Install pytest
+        run: python3 -m pip install pytest
+      - name: Run tests
+        run: pytest Backend
+
