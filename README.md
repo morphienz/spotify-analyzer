@@ -42,3 +42,10 @@ VITE_API_URL=http://127.0.0.1:8080
 If your backend is running on a different host or port (for example when using a
 remote container), update `VITE_API_URL` accordingly so that login redirects work
 correctly.
+
+### Available Pages
+
+- `/` – login or start page
+- `/analyze` – choose between liked tracks or playlist analysis
+- `/analyze/liked` – automatically analyze your liked songs
+- `/analyze/playlist` – analyze any playlist by URL or ID
