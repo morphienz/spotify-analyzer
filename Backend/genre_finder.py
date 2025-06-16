@@ -130,6 +130,8 @@ class GenreFinder:
             main_artist = artists[0] if artists else {"name": "unknown", "id": "unknown"}
             artist_name = main_artist.get("name", "unknown")
             track_name = track.get("name", "unknown")
+            preview_url = track.get("preview_url")
+            uri = track.get("uri")
 
             spotify_genres = self._get_spotify_artist_details(main_artist["id"]).get("genres", [])
             lastfm_genres = self._get_lastfm_genres(artist_name, track_name)
@@ -151,6 +153,10 @@ class GenreFinder:
                     "primary_genre": "unknown",
                     "confidence": 0.0,
                     "sources": sources,
+                    "name": track_name,
+                    "artist": artist_name,
+                    "preview_url": preview_url,
+                    "uri": uri,
                     "timestamp": datetime.utcnow()
                 }
 
@@ -162,6 +168,10 @@ class GenreFinder:
                 "primary_genre": primary_genre[0],
                 "confidence": round(primary_genre[1], 2),
                 "sources": sources,
+                "name": track_name,
+                "artist": artist_name,
+                "preview_url": preview_url,
+                "uri": uri,
                 "timestamp": datetime.utcnow()
             }
 
@@ -193,6 +203,10 @@ class GenreFinder:
                         "primary_genre": primary,
                         "confidence": result.get("confidence", 0.0),
                         "sources": result.get("sources", {}),
+                        "name": result.get("name"),
+                        "artist": result.get("artist"),
+                        "preview_url": result.get("preview_url"),
+                        "uri": result.get("uri"),
                         "last_updated": datetime.utcnow()
                     })
                 except Exception as e:
@@ -208,7 +222,7 @@ class GenreFinder:
         try:
             results = self.sp.playlist_tracks(
                 playlist_id,
-                fields="items(track(id,name,artists))",
+                fields="items(track(id,name,artists,preview_url,uri))",
                 limit=100
             )
             track_ids = [item['track']['id'] for item in results['items'] if item.get('track')]

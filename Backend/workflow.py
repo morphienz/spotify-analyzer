@@ -99,7 +99,9 @@ def get_user_tracks(sp: spotipy.Spotify, max_tracks: int = MAX_TRACKS) -> List[D
                     "id": item["track"]["id"],
                     "name": item["track"]["name"],
                     "artist": item["track"]["artists"][0]["name"],
-                    "added_at": item["added_at"]
+                    "added_at": item["added_at"],
+                    "preview_url": item["track"].get("preview_url"),
+                    "uri": item["track"].get("uri")
                 } for item in results.get("items", []) if item.get("track")
             ]
 
@@ -313,7 +315,9 @@ def get_analysis_details(analysis_id: str) -> Dict[str, List[Dict]]:
             {
                 "id": tid,
                 "name": track_lookup.get(tid, {}).get("name", "Unknown"),
-                "artist": track_lookup.get(tid, {}).get("artist", "Unknown")
+                "artist": track_lookup.get(tid, {}).get("artist", "Unknown"),
+                "preview_url": track_lookup.get(tid, {}).get("preview_url"),
+                "uri": track_lookup.get(tid, {}).get("uri")
             }
             for tid in track_ids if tid in track_lookup
         ]
