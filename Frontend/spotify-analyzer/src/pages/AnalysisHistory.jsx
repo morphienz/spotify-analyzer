@@ -36,9 +36,19 @@ function AnalysisHistory() {
       ) : (
         <ul className="w-full max-w-xl space-y-4">
           {history.map((item) => (
-            <li key={item.analysis_id} className="bg-gray-800 p-4 rounded-lg flex justify-between">
-              <Link className="text-green-400 hover:underline" to={`/result/${item.analysis_id}`}>{new Date(item.created_at).toLocaleString()}</Link>
-              <span className="text-sm text-gray-300">{item.track_count} şarkı / {item.genre_count} tür</span>
+            <li
+              key={item.analysis_id}
+              className="bg-gray-800 p-4 rounded-lg flex justify-between"
+            >
+              <Link
+                className="text-green-400 hover:underline"
+                to={`/result/${item.analysis_id}`}
+              >
+                {new Date(item.created_at).toLocaleString()}
+              </Link>
+              <span className="text-sm text-gray-300">
+                {item.track_count} şarkı / {item.genre_count} tür
+              </span>
             </li>
           ))}
         </ul>

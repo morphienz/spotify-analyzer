@@ -1,15 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { logout as apiLogout } from "../api.js";
 
 function UserMenu() {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const navigate = useNavigate();
 
-  const name = localStorage.getItem('userName') || 'Kullanıcı';
-  const image =
-    localStorage.getItem('userImage') ||
-    '/vite.svg';
+  const name = localStorage.getItem("userName") || "Kullanıcı";
+  const image = localStorage.getItem("userImage") || "/vite.svg";
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -17,13 +16,19 @@ function UserMenu() {
         setOpen(false);
       }
     };
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await apiLogout();
+    } catch (e) {
+      console.error("Logout failed", e);
+    } finally {
+      localStorage.removeItem("isLoggedIn");
+      navigate("/");
+    }
   };
 
   return (
