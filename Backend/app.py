@@ -252,11 +252,13 @@ async def full_auto_playlist_creation(analysis_id: str = Body(..., embed=True)):
                 detail="Analiz bulunamadı"
             )
 
-        # 2. Tüm şarkıları al
-        track_ids = [track["id"] for track in analysis.get("tracks", [])]
-
-        # 3. Tür analizi yap
-        genre_map = analyze_genres(track_ids)
+        # 2. Tür verisi hazır mı kontrol et
+        if analysis.get("genres"):
+            genre_map = analysis["genres"]
+        else:
+            # Önceden analiz edilmemişse şarkıları alıp analiz et
+            track_ids = [track["id"] for track in analysis.get("tracks", [])]
+            genre_map = analyze_genres(track_ids)
 
         # 4. Playlist oluştur
         creator = PlaylistCreator()
@@ -339,7 +341,7 @@ async def get_analysis_breakdown(analysis_id: str):
 async def get_analysis_details_endpoint(analysis_id: str):
     try:
         details = get_analysis_details(analysis_id)
-        return ApiResponseFormatter.success(details)
+        return ApiResponseFormatter.success({"tracks": details})
     except Exception as e:
         return ApiResponseFormatter.error(e)
 
