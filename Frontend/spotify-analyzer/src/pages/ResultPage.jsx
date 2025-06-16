@@ -12,6 +12,12 @@ function ResultPage() {
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [genreTrackMap, setGenreTrackMap] = useState({});
   const [excludedTrackIds, setExcludedTrackIds] = useState([]);
+  const [manualAssignments, setManualAssignments] = useState({});
+  const [analysisStats, setAnalysisStats] = useState({
+    totalTracks: 0,
+    genreCount: 0,
+    unknownCount: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -52,6 +58,14 @@ function ResultPage() {
         const { data, status } = await res.json();
         if (status === "success") {
           setGenreTrackMap(data.tracks);
+          const allGenres = data.tracks || {};
+          const totalTracks = Object.values(allGenres).reduce(
+            (sum, arr) => sum + arr.length,
+            0,
+          );
+          const genreCount = Object.keys(allGenres).length;
+          const unknownCount = (allGenres["unknown"] || []).length;
+          setAnalysisStats({ totalTracks, genreCount, unknownCount });
         }
       } catch (err) {
         console.error("❌ Details fetch error:", err);
@@ -79,6 +93,14 @@ function ResultPage() {
       selectedTracks[genre] = (genreTrackMap[genre] || [])
         .filter((t) => !excludedTrackIds.includes(t.id))
         .map((t) => t.id);
+    }
+
+    for (const [id, genre] of Object.entries(manualAssignments)) {
+      if (!genre || excludedTrackIds.includes(id)) continue;
+      selectedTracks[genre] = selectedTracks[genre] || [];
+      if (!selectedTracks[genre].includes(id)) {
+        selectedTracks[genre].push(id);
+      }
     }
 
     try {
@@ -200,6 +222,13 @@ function ResultPage() {
               <Pie data={chartData} options={chartOptions} />
             </div>
 
+            <div className="mt-4 text-center text-sm text-gray-300">
+              Toplam {analysisStats.totalTracks} şarkı analiz edildi, {analysisStats.genreCount} tür bulundu.
+              {analysisStats.unknownCount > 0 && (
+                <span> {analysisStats.unknownCount} şarkının türü belirlenemedi.</span>
+              )}
+            </div>
+
             <div className="mt-6">
               <h2 className="text-lg font-semibold mb-2">Seçilen Türler:</h2>
               <div className="flex flex-wrap gap-2">
@@ -220,6 +249,8 @@ function ResultPage() {
               selectedGenres={new Set(selectedGenres)}
               excludedTrackIds={excludedTrackIds}
               toggleExclude={toggleExclude}
+              manualAssignments={manualAssignments}
+              setManualAssignments={setManualAssignments}
             />
 
             <button
