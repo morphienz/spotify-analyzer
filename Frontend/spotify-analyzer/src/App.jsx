@@ -68,8 +68,8 @@ function App() {
         const authUrl = await fetchAuthUrl();
         window.location.href = authUrl;
       } catch (err) {
-        console.error("Login start failed", err);
-        setLoginMessage("Giriş başlatılamadı");
+        console.error('Login start failed', err);
+        setLoginMessage('Giriş başlatılamadı');
       }
     }
   };

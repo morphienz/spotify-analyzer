@@ -1,7 +1,6 @@
 import asyncio
 import os
 import logging
-import spotipy
 from bson import ObjectId
 from typing import Optional, Dict, List
 from datetime import datetime
@@ -32,8 +31,7 @@ from workflow import (
     get_breakdown_for_analysis,
     get_analysis_details,
     get_filtered_genres,
-    get_user_analysis_history,
-    delete_user_analysis_history
+    get_user_analysis_history
 )
 from utils import (
     ApiResponseFormatter,
@@ -88,10 +86,7 @@ SPOTIFY_RETRY_CONFIG = {
 }
 
 # --- Yardımcı Fonksiyonlar ---
-def get_spotify_client(request: Request | None = None):
-    if request:
-        user_id = request.cookies.get("spotify_user_id")
-        auth_manager.set_current_user(user_id)
+def get_spotify_client():
     return auth_manager.get_valid_client()
 
 # --- Giriş ve Auth Endpointleri ---
@@ -118,24 +113,16 @@ def start_auth():
 @app.get("/auth/callback")
 def auth_callback(code: str):
     try:
-        token_info = auth_manager.oauth.get_access_token(code)
+        token_info = auth_manager.oauth.get_access_token(code)  # as_dict kaldırıldı
         token_info = auth_manager._add_metadata(token_info)
+        auth_manager._save_token(token_info)
 
-        sp = spotipy.Spotify(auth=token_info["access_token"])
-        user = sp.me()
-        user_id = user.get("id")
-
-        auth_manager.set_current_user(user_id)
-        auth_manager._save_token(token_info, user_id)
-
-        response = RedirectResponse(
+        return RedirectResponse(
             url=os.getenv(
                 "FRONTEND_REDIRECT_URI",
                 "http://127.0.0.1:5173/callback?login=success",
             )
         )
-        response.set_cookie("spotify_user_id", user_id, httponly=True, samesite="lax")
-        return response
     except Exception as e:
         logger.error(f"Auth callback hatası: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Authentication failed")
@@ -159,14 +146,78 @@ async def health_check():
         return ApiResponseFormatter.error(e)
 
 # --- Analiz Başlat ---
-@app.post("/analyze", status_code=status.HTTP_410_GONE)
-async def analyze_playlist(_: AnalysisRequest):
-    """Playlist analizi artık desteklenmiyor."""
-    raise HTTPException(status_code=status.HTTP_410_GONE, detail="Playlist analysis feature has been removed")
+@app.post("/analyze", status_code=status.HTTP_202_ACCEPTED)
+@retry(**SPOTIFY_RETRY_CONFIG)
+async def analyze_playlist(request: AnalysisRequest = Body(...)):
+    logger.info(f"Playlist creation request received: {request.dict()}")
+    try:
+        sp = get_spotify_client()
+        playlist = smart_request_with_retry(
+            sp.playlist,
+            request.playlist_id,
+            fields="name,owner,tracks.total"
+        )
+
+        all_track_ids = []
+        offset = 0
+        total = playlist['tracks']['total']
+
+        while offset < total:
+            results = smart_request_with_retry(
+                sp.playlist_tracks,
+                request.playlist_id,
+                limit=100,
+                offset=offset,
+                fields="items(track(id,name,artists))"
+            )
+            batch_ids = [
+                item['track']['id']
+                for item in results['items']
+                if item.get('track') and item['track'].get('id')
+            ]
+            all_track_ids.extend(batch_ids)
+            offset += len(results['items'])
+
+        cached_tracks = []
+        uncached_ids = all_track_ids
+        if not request.force_refresh:
+            cached_tracks = get_cached_tracks(all_track_ids)
+            cached_ids = [t['_id'] for t in cached_tracks]
+            uncached_ids = [tid for tid in all_track_ids if tid not in cached_ids]
+
+        fetched_features = []
+        for chunk in chunk_list(uncached_ids, 100):
+            response = smart_request_with_retry(sp.audio_features, chunk)
+            if response:
+                fetched_features += [f for f in response if f]
+
+        cache_tracks(fetched_features)
+
+        analysis_data = {
+            "playlist_id": request.playlist_id,
+            "playlist_name": playlist['name'],
+            "owner": playlist['owner']['display_name'],
+            "tracks": {
+                "total": total,
+                "analyzed": len(cached_tracks) + len(fetched_features)
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        analysis_id = save_analysis(analysis_data)
+
+        return ApiResponseFormatter.success(
+            {"analysis_id": analysis_id},
+            status_code=status.HTTP_202_ACCEPTED
+        )
+
+    except Exception as e:
+        logger.error(f"Analiz hatası: {str(e)}", exc_info=True)
+        return ApiResponseFormatter.error(e)
 
 @app.post("/analyze-liked", status_code=status.HTTP_202_ACCEPTED)
 @retry(**SPOTIFY_RETRY_CONFIG)
-async def analyze_liked_tracks(request: Request):
+async def analyze_liked_tracks():
     try:
         sp = get_spotify_client()
 
@@ -308,27 +359,19 @@ async def get_filtered_analysis(analysis_id: str, exclude: List[str] = Query(def
         return ApiResponseFormatter.error(e)
 
 @app.get("/user/analyses")
-async def list_user_analyses(request: Request):
+async def list_user_analyses():
     try:
-        user_id = get_spotify_client(request).me()["id"]
+        user_id = get_spotify_client().me()["id"]
         history = get_user_analysis_history(user_id)
         return ApiResponseFormatter.success(history)
     except Exception as e:
         return ApiResponseFormatter.error(e)
-@app.delete("/user/analyses")
-async def clear_user_analyses(request: Request):
-    try:
-        user_id = get_spotify_client(request).me()["id"]
-        deleted = delete_user_analysis_history(user_id)
-        return ApiResponseFormatter.success({"deleted": deleted})
-    except Exception as e:
-        return ApiResponseFormatter.error(e)
 
 @app.get("/user/profile")
-async def get_user_profile(request: Request):
-
+async def get_user_profile():
+    """Return basic profile information for the logged in user."""
     try:
-        sp = get_spotify_client(request)
+        sp = get_spotify_client()
         profile = smart_request_with_retry(sp.me)
         data = {
             "display_name": profile.get("display_name"),
@@ -352,12 +395,10 @@ async def get_analysis_progress(analysis_id: str):
         return ApiResponseFormatter.error(e)
 
 @app.post("/logout")
-async def logout_user(response: Response, request: Request):
+async def logout_user():
     """Clear stored Spotify tokens and log the user out."""
     try:
-        user_id = request.cookies.get("spotify_user_id")
-        auth_manager.clear_tokens(user_id)
-        response.delete_cookie("spotify_user_id")
+        auth_manager.clear_tokens()
         return ApiResponseFormatter.success({"message": "Logout successful"})
     except Exception as e:
         return ApiResponseFormatter.error(e)

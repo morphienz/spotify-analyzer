@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout as apiLogout } from "../api.js";
 import { UserContext } from "../UserContext.jsx";
+import { logout as apiLogout, fetchAuthUrl } from "../api.js";
 import { API_BASE_URL } from "../config.js";
 
 function UserMenu() {
@@ -34,6 +34,8 @@ function UserMenu() {
       console.error("Logout failed", e);
     } finally {
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userImage");
       setIsLoggedIn(false);
       setProfile(null);
       navigate("/");
@@ -43,8 +45,13 @@ function UserMenu() {
   if (!isLoggedIn) {
     return (
       <button
-        onClick={() => {
-          window.location.href = `${API_BASE_URL}/login`;
+        onClick={async () => {
+          try {
+            const url = await fetchAuthUrl();
+            window.location.href = url;
+          } catch (err) {
+            console.error('Login start failed', err);
+          }
         }}
         className="px-4 py-2 bg-green-500 text-black rounded-full"
       >
@@ -52,7 +59,7 @@ function UserMenu() {
       </button>
     );
   }
-
+          
   return (
     <div className="relative" ref={ref}>
       <button
