@@ -1,5 +1,6 @@
 // App.jsx
 import { useEffect, useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import UserMenu from './components/UserMenu.jsx';
 import PageWrapper from './components/PageWrapper.jsx';
@@ -21,6 +22,7 @@ function App() {
   const [currentSlogan, setCurrentSlogan] = useState(0);
   const [feedback, setFeedback] = useState("");
   const { isLoggedIn, setIsLoggedIn, setProfile } = useContext(UserContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -52,8 +54,8 @@ function App() {
 
   const handleButtonClick = () => {
     if (isLoggedIn) {
-      // Analiz seçenek sayfasına git (bir sonraki adımda yapılacak)
-      window.location.href = "/analyze/liked";
+      // Navigate without full reload
+      navigate("/analyze/liked");
     } else {
       window.location.href = `${API_BASE_URL}/login`;
     }
@@ -66,6 +68,9 @@ function App() {
       console.error("Logout failed", e);
     } finally {
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userImage");
+      localStorage.removeItem("profile");
       setIsLoggedIn(false);
       setProfile(null);
       window.location.href = "/";
