@@ -7,6 +7,8 @@ import './index.css';
 import { UserContext } from './UserContext.jsx';
 import { logout as apiLogout } from './api.js';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
 const slogans = [
   "Türlerin ötesine geç!",
   "Müziğini analiz et.",
@@ -45,7 +47,7 @@ function App() {
       // Analiz seçenek sayfasına git (bir sonraki adımda yapılacak)
       window.location.href = "/analyze/liked";
     } else {
-      window.location.href = `${import.meta.env.VITE_API_URL}/login`;
+      window.location.href = `${API_BASE_URL}/login`;
     }
   };
 

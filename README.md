@@ -33,3 +33,12 @@ npm install
 npm run dev
 ```
 This starts the Vite development server, typically reachable at `http://localhost:5173`.
+The frontend expects an API endpoint specified in `Frontend/spotify-analyzer/.env`:
+
+```
+VITE_API_URL=http://127.0.0.1:8080
+```
+
+If your backend is running on a different host or port (for example when using a
+remote container), update `VITE_API_URL` accordingly so that login redirects work
+correctly.
