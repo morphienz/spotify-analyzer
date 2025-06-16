@@ -36,11 +36,22 @@ function UserMenu() {
       localStorage.removeItem("isLoggedIn");
       setIsLoggedIn(false);
       setProfile(null);
-      localStorage.removeItem("userName");
-      localStorage.removeItem("userImage");
       navigate("/");
     }
   };
+    
+  if (!isLoggedIn) {
+    return (
+      <button
+        onClick={() => {
+          window.location.href = `${API_BASE_URL}/login`;
+        }}
+        className="px-4 py-2 bg-green-500 text-black rounded-full"
+      >
+        Giriş Yap
+      </button>
+    );
+  }
 
   if (!isLoggedIn) {
     return (

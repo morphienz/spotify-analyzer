@@ -32,7 +32,8 @@ export const createPlaylists = async (analysisId, selectedTracks = {}, excludedT
 
 export const fetchUserAnalyses = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/analyses`, {
+     const response = await fetch(`${API_BASE_URL}/user/analyses`, {
+
       method: "GET",
       mode: "cors",
       credentials: "include",
@@ -49,11 +50,28 @@ export const fetchUserAnalyses = async () => {
     throw err;
   }
 };
+export const clearUserAnalyses = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/analyses`, {
+      method: "DELETE",
+      mode: "cors",
+      credentials: "include",
+    });
 
+    const data = await response.json();
+    if (!response.ok || data.status !== "success") {
+      throw new Error(data.detail || data.message || "Geçmiş temizlenemedi.");
+    }
+
+    return data.data;
+  } catch (err) {
+    console.error("🎯 API clear history error:", err);
+    throw err;
+  }
+};
 export const fetchUserProfile = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/user/profile`, {
-      method: "GET",
       mode: "cors",
       credentials: "include",
     });
@@ -101,7 +119,6 @@ export const logout = async () => {
     throw err;
   }
 };
-
 export const fetchAuthUrl = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/start-auth`, {
@@ -122,4 +139,3 @@ export const fetchAuthUrl = async () => {
     throw err;
   }
 };
-

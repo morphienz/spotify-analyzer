@@ -26,7 +26,7 @@ function CallbackPage() {
           }, 1000);
         });
     } else {
-      const errorMsg = params.get('error') || 'Giriş başarısız';
+       const errorMsg = params.get('error') || 'Giriş başarısız';
       setError(errorMsg);
     }
   }, [navigate, setIsLoggedIn, setProfile]);

@@ -31,7 +31,7 @@ function PlaylistButton({
     };
 
     try {
-      const res = await fetch(`${API_BASE_URL}/playlists`, {
+       const res = await fetch(`${API_BASE_URL}/playlists`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)

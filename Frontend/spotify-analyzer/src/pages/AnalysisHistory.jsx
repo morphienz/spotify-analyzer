@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchUserAnalyses } from "../api";
+import { fetchUserAnalyses, clearUserAnalyses } from "../api";
 import UserMenu from "../components/UserMenu.jsx";
 
 function AnalysisHistory() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -22,11 +23,31 @@ function AnalysisHistory() {
     };
     load();
   }, []);
+  const handleClear = async () => {
+    setClearing(true);
+    try {
+      await clearUserAnalyses();
+      setHistory([]);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Temizleme başarısız");
+    } finally {
+      setClearing(false);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center py-10 relative">
       <UserMenu />
       <h1 className="text-3xl font-bold mb-6">Analiz Geçmişi</h1>
+      <button
+        onClick={handleClear}
+        disabled={clearing || history.length === 0}
+        className="mb-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded disabled:opacity-50"
+      >
+        Geçmişi Temizle
+      </button>
       {loading ? (
         <p>Yükleniyor...</p>
       ) : error ? (

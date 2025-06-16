@@ -50,7 +50,7 @@ class SpotifyAuthManager:
         self.mongo = MongoDBManager()
         self.current_user: Optional[str] = None
 
-        def set_current_user(self, user_id: str | None):
+        def set_current_user(self, user_id: str | None) -> None:
             """Geçerli kullanıcıyı ayarla"""
             self.current_user = user_id
 

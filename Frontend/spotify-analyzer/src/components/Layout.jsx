@@ -6,7 +6,6 @@ import { API_BASE_URL } from '../config.js';
 
 function Layout() {
   const { isLoggedIn } = useContext(UserContext);
-
   return (
     <div className="min-h-screen bg-black text-white">
       <header className="fixed top-0 left-0 right-0 bg-black flex justify-between items-center p-4 z-20">

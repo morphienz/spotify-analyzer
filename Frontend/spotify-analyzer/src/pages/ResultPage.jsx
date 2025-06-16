@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UserMenu from "../components/UserMenu.jsx";
+import PageWrapper from "../components/PageWrapper.jsx";
 import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import SelectionPanel from "../components/SelectionPanel";
-import PageWrapper from "../components/PageWrapper.jsx";
 import { API_BASE_URL } from "../config.js";
 
 function ResultPage() {
@@ -82,6 +82,8 @@ function ResultPage() {
       prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre],
     );
   };
+  const getCountForGenre = (genre) =>
+    genres.find((g) => g.genre === genre)?.count || 0;
 
   const getCountForGenre = (genre) =>
     genres.find((g) => g.genre === genre)?.count || 0;
@@ -107,7 +109,6 @@ function ResultPage() {
         selectedTracks[genre].push(id);
       }
     }
-
     try {
       const res = await fetch(`${API_BASE_URL}/playlists`, {
         method: "POST",
@@ -211,7 +212,7 @@ function ResultPage() {
 
   return (
     <PageWrapper>
-      <div className="bg-[#121212] text-white min-h-screen flex flex-col items-center py-10 px-4 relative">
+    <div className="bg-[#121212] text-white min-h-screen flex flex-col items-center py-10 px-4 relative">
         <UserMenu />
         <h1 className="text-3xl font-bold mb-6">Analiz Sonuçları</h1>
 
@@ -226,15 +227,13 @@ function ResultPage() {
             <div className="w-full max-w-xl">
               <Pie data={chartData} options={chartOptions} />
             </div>
-
             <div className="mt-4 text-center text-sm text-gray-300">
               Toplam {analysisStats.totalTracks} şarkı analiz edildi, {analysisStats.genreCount} tür bulundu.
               {analysisStats.unknownCount > 0 && (
                 <span> {analysisStats.unknownCount} şarkının türü belirlenemedi.</span>
               )}
             </div>
-
-            <div className="mt-6">
+          <div className="mt-6">
               <h2 className="text-lg font-semibold mb-2">Seçilen Türler:</h2>
               <div className="flex flex-wrap gap-2">
                 {selectedGenres.map((genre) => (
