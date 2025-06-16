@@ -6,7 +6,7 @@ import UserMenu from './components/UserMenu.jsx';
 import PageWrapper from './components/PageWrapper.jsx';
 import './index.css';
 import { UserContext } from './UserContext.jsx';
-import { logout as apiLogout, fetchUserProfile } from './api.js';
+import { logout as apiLogout, fetchUserProfile, fetchAuthUrl } from './api.js';
 import { API_BASE_URL } from './config.js';
 
 const slogans = [
@@ -60,11 +60,17 @@ function App() {
     return () => clearTimeout(t);
   }, [loginMessage]);
 
-  const handleButtonClick = () => {
+ const handleButtonClick = async () => {
     if (isLoggedIn) {
       navigate("/analyze");
     } else {
-      window.location.href = `${API_BASE_URL}/login`;
+      try {
+        const authUrl = await fetchAuthUrl();
+        window.location.href = authUrl;
+      } catch (err) {
+        console.error("Login start failed", err);
+        setLoginMessage("Giriş başlatılamadı");
+      }
     }
   };
 

@@ -102,3 +102,24 @@ export const logout = async () => {
   }
 };
 
+export const fetchAuthUrl = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/start-auth`, {
+      method: "GET",
+      mode: "cors",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.auth_url) {
+      throw new Error(data.detail || "Yetkilendirme adresi alınamadı.");
+    }
+
+    return data.auth_url;
+  } catch (err) {
+    console.error("🎯 API auth url error:", err);
+    throw err;
+  }
+};
+
