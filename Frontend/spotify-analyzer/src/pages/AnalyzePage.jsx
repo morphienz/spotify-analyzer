@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PageWrapper from "../components/PageWrapper.jsx";
 
 function AnalyzePage() {
   const [status, setStatus] = useState("Hazırlanıyor...");
@@ -45,15 +46,17 @@ function AnalyzePage() {
   }, [navigate]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen text-white bg-black">
-      <div className="text-xl mb-4">{status}</div>
-      <div className="w-1/2 h-4 bg-gray-700 rounded">
-        <div
-          className="h-full bg-green-500 rounded transition-all duration-700"
-          style={{ width: `${progress}%` }}
-        ></div>
+    <PageWrapper>
+      <div className="flex flex-col items-center justify-center h-screen text-white bg-black">
+        <div className="text-xl mb-4">{status}</div>
+        <div className="w-1/2 h-4 bg-gray-700 rounded">
+          <div
+            className="h-full bg-green-500 rounded transition duration-700"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }
 
