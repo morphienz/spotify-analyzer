@@ -88,6 +88,7 @@ class PlaylistCreator:
                 "name": name,
                 "owner": self.user_id,
                 "tracks": [],
+                "url": playlist.get("external_urls", {}).get("spotify"),
                 "created_at": datetime.utcnow(),
                 "expires_at": datetime.utcnow() + timedelta(days=CACHE_TTL_DAYS)
             }
@@ -167,11 +168,16 @@ class PlaylistCreator:
                     # Şarkı ekleme
                     success, count = await asyncio.to_thread(self._add_tracks_safe, playlist["id"], filtered_ids)
 
+                    if count == 0:
+                        logger.warning(f"{genre} türü için şarkılar eklenemedi, playlist boş olabilir.")
+                    else:
+                        logger.info(f"{genre} türü playlistine {count} şarkı eklendi")
+
                     results[genre] = {
                         "playlist_id": playlist["id"],
                         "track_count": count,
                         "snapshot_id": playlist.get("snapshot_id", "unknown"),
-                        "url": playlist.get("external_urls", {}).get("spotify", "#")
+                        "url": playlist.get("external_urls", {}).get("spotify") or playlist.get("url", "#")
                     }
 
                     # MongoDB kayıt
