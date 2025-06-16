@@ -177,9 +177,12 @@ class ApiResponseFormatter:
 class RateLimiter:
     """Rate limit yönetimi için yardımcı sınıf"""
 
-    def __init__(self, calls: int, period: int):
-        self.calls = calls
-        self.period = period
+    def __init__(self, calls: int | None = None, period: int | None = None):
+        env_calls = int(os.getenv("RATE_LIMIT_CALLS", 20))
+        env_period = int(os.getenv("RATE_LIMIT_PERIOD", 10))
+
+        self.calls = calls if calls is not None else env_calls
+        self.period = period if period is not None else env_period
         self.timestamps = []
 
     def __call__(self, func: Callable) -> Callable:

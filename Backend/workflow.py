@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 # --- Ayarlar ---
 MAX_TRACKS = int(os.getenv("MAX_TRACKS", 5000))
 DEFAULT_CHUNK_SIZE = 100
-REQUEST_DELAY = 0.2
+REQUEST_DELAY = float(os.getenv("SPOTIFY_REQUEST_DELAY", 0.2))
 MAX_WORKERS = int(os.getenv("WORKFLOW_MAX_WORKERS", 5))
 
 # --- Retry Ayarları ---
@@ -110,7 +110,7 @@ def get_user_tracks(sp: spotipy.Spotify, max_tracks: int = MAX_TRACKS) -> List[D
                 continue
 
             tracks.extend(batch)
-            offset += len(batch)
+            offset += len(results.get("items", []))
             logger.info(f"📥 Yüklenen şarkı: {len(tracks)}/{max_tracks}")
             time.sleep(REQUEST_DELAY)
 
@@ -364,7 +364,11 @@ def get_user_analysis_history(user_id: str) -> List[Dict]:
         }
         for doc in analyses
     ]
-
+def delete_user_analysis_history(user_id: str) -> int:
+    db = MongoDBManager()
+    collection = db.get_collection("analyses")
+    result = collection.delete_many({"user_id": user_id})
+    return result.deleted_count
 
 # --- CLI Test ---
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserMenu from "../components/UserMenu.jsx";
 import PageWrapper from "../components/PageWrapper.jsx";
+import { API_BASE_URL } from "../config.js";
 
 function AnalyzeLiked() {
   const [status, setStatus] = useState("Hazırlanıyor...");
@@ -19,7 +20,7 @@ function AnalyzeLiked() {
         setStatus("Beğenilen şarkılar alınıyor...");
         setProgress(25);
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/analyze-liked`, {
+        const res = await fetch(`${API_BASE_URL}/analyze-liked`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

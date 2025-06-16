@@ -1,15 +1,21 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { logout as apiLogout } from "../api.js";
+import { UserContext } from "../UserContext.jsx";
+import { API_BASE_URL } from "../config.js";
 
 function UserMenu() {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const navigate = useNavigate();
+  const { isLoggedIn, setIsLoggedIn, profile, setProfile } = useContext(UserContext);
 
-  const name = localStorage.getItem('userName') || 'Kullanıcı';
+  const name =
+    profile?.display_name || localStorage.getItem("userName") || "Kullanıcı";
   const image =
-    localStorage.getItem('userImage') ||
-    'https://via.placeholder.com/32';
+    (profile?.images && profile.images[0]?.url) ||
+    localStorage.getItem("userImage") ||
+    "/vite.svg";
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -17,14 +23,35 @@ function UserMenu() {
         setOpen(false);
       }
     };
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await apiLogout();
+    } catch (e) {
+      console.error("Logout failed", e);
+    } finally {
+      localStorage.removeItem("isLoggedIn");
+      setIsLoggedIn(false);
+      setProfile(null);
+      navigate("/");
+    }
   };
+    
+  if (!isLoggedIn) {
+    return (
+      <button
+        onClick={() => {
+          window.location.href = `${API_BASE_URL}/login`;
+        }}
+        className="px-4 py-2 bg-green-500 text-black rounded-full"
+      >
+        Giriş Yap
+      </button>
+    );
+  }
 
   return (
     <div className="relative" ref={ref}>
