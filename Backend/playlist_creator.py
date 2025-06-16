@@ -72,6 +72,13 @@ class PlaylistCreator:
                     # Verify that the playlist still exists on Spotify
                     smart_request_with_retry(self.sp.playlist, cached["_id"])
                     logger.info(f"🎧 Playlist önbellekten alındı: {name}")
+                    cached.setdefault("id", cached.get("_id"))
+                    try:
+                        smart_request_with_retry(
+                            self.sp.current_user_follow_playlist, cached["_id"]
+                        )
+                    except Exception as e:
+                        logger.warning(f"Playlist takip işlemi başarısız: {e}")
                     return cached
                 except Exception:
                     logger.warning(
@@ -98,6 +105,7 @@ class PlaylistCreator:
 
             playlist_doc = {
                 "_id": playlist.get("id", ""),
+                "id": playlist.get("id", ""),
                 "name": name,
                 "owner": self.user_id,
                 "tracks": [],
