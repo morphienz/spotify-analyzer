@@ -154,6 +154,7 @@ async def analyze_playlist(request: AnalysisRequest = Body(...)):
         )
 
         all_track_ids = []
+        track_meta = {}
         offset = 0
         total = playlist['tracks']['total']
 
@@ -163,13 +164,22 @@ async def analyze_playlist(request: AnalysisRequest = Body(...)):
                 request.playlist_id,
                 limit=100,
                 offset=offset,
-                fields="items(track(id,name,artists))"
+                fields="items(track(id,name,artists,preview_url,uri))"
             )
             batch_ids = [
                 item['track']['id']
                 for item in results['items']
                 if item.get('track') and item['track'].get('id')
             ]
+            for item in results['items']:
+                tr = item.get('track')
+                if tr and tr.get('id'):
+                    track_meta[tr['id']] = {
+                        'name': tr.get('name'),
+                        'artist': tr.get('artists', [{}])[0].get('name'),
+                        'preview_url': tr.get('preview_url'),
+                        'uri': tr.get('uri')
+                    }
             all_track_ids.extend(batch_ids)
             offset += len(results['items'])
 
@@ -184,7 +194,11 @@ async def analyze_playlist(request: AnalysisRequest = Body(...)):
         for chunk in chunk_list(uncached_ids, 100):
             response = smart_request_with_retry(sp.audio_features, chunk)
             if response:
-                fetched_features += [f for f in response if f]
+                for f in response:
+                    if f and f.get('id'):
+                        meta = track_meta.get(f['id'], {})
+                        f.update(meta)
+                        fetched_features.append(f)
 
         cache_tracks(fetched_features)
 
