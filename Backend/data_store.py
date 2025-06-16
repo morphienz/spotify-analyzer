@@ -286,3 +286,15 @@ def get_user_analyses(user_id: str, limit: int = 20) -> List[Dict]:
     except errors.PyMongoError as e:
         logger.error(f"Kullanıcı analiz geçmişi hatası: {str(e)}")
         return []
+
+
+@retry(**MONGO_RETRY_CONFIG)
+def clear_user_analyses(user_id: str) -> int:
+    """Belirli bir kullanıcının analiz geçmişini siler"""
+    try:
+        collection = MongoDBManager().get_collection("analyses")
+        result = collection.delete_many({"user_id": user_id})
+        return result.deleted_count
+    except errors.PyMongoError as e:
+        logger.error(f"Analiz geçmişi temizleme hatası: {str(e)}")
+        return 0

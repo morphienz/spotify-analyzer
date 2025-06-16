@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Callback from "./pages/Callback.jsx";
 import AnalyzeOptions from "./pages/AnalyzeOptions.jsx";
 import AnalyzeLiked from "./pages/AnalyzeLiked.jsx";
-import AnalyzePlaylist from "./pages/AnalyzePlaylist.jsx";
 import ResultPage from "./pages/ResultPage.jsx";
 import AnalyzePage from "./pages/AnalyzePage.jsx";
 import AnalysisHistory from "./pages/AnalysisHistory.jsx";
@@ -22,7 +21,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path="/" element={<App />} />
             <Route path="/callback" element={<Callback />} />
             <Route path="/analyze" element={<AnalyzeOptions />} />
-            <Route path="/analyze/playlist" element={<AnalyzePlaylist />} />
             <Route path="/analyze/liked" element={<AnalyzeLiked />} />
             <Route path="/result/:analysisId" element={<ResultPage />} />
             <Route

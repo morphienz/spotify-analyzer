@@ -28,6 +28,7 @@ if not os.getenv("SPOTIPY_CLIENT_ID") or not os.getenv("SPOTIPY_CLIENT_SECRET"):
 SCOPES = "playlist-modify-private playlist-modify-public user-library-read user-top-read"
 TOKEN_COLLECTION = "auth_tokens"
 TOKEN_EXPIRY_BUFFER = 300  # 5 minutes
+CURRENT_USER_KEY = "current_user"
 
 # --- Retry Configuration ---
 RETRY_CONFIG = {
@@ -50,6 +51,19 @@ class SpotifyAuthManager:
         self.mongo = MongoDBManager()
         self.current_user = None
 
+    def list_users(self) -> list:
+        collection = self.mongo.get_collection(TOKEN_COLLECTION)
+        users = collection.find({"_id": {"$ne": CURRENT_USER_KEY}}, {"_id": 1})
+        return [doc["_id"] for doc in users]
+
+    def set_current_user(self, user_id: str) -> bool:
+        collection = self.mongo.get_collection(TOKEN_COLLECTION)
+        if not collection.find_one({"_id": user_id}):
+            return False
+        collection.update_one({"_id": CURRENT_USER_KEY}, {"$set": {"user_id": user_id}}, upsert=True)
+        self.current_user = user_id
+        return True
+
     @retry(**RETRY_CONFIG)
     def get_valid_client(self) -> spotipy.Spotify:
         """Geçerli bir Spotify client instance'ı döndürür"""
@@ -67,19 +81,30 @@ class SpotifyAuthManager:
     def _load_token(self) -> Optional[Dict]:
         """Token'ı MongoDB'den yükler"""
         collection = self.mongo.get_collection(TOKEN_COLLECTION)
-        return collection.find_one({"_id": "current_user"})
+        active = collection.find_one({"_id": CURRENT_USER_KEY})
+        if not active:
+            return None
+        user_id = active.get("user_id")
+        self.current_user = user_id
+        return collection.find_one({"_id": user_id})
 
     @retry(**RETRY_CONFIG)
-    def _save_token(self, token_info: Dict) -> None:
+    def _save_token(self, token_info: Dict, set_current: bool = True) -> None:
         """Token'ı MongoDB'ye kaydeder"""
         collection = self.mongo.get_collection(TOKEN_COLLECTION)
-        token_info['_id'] = "current_user"
-        collection.replace_one(
-            {"_id": "current_user"},
-            token_info,
-            upsert=True
-        )
-        logger.info("Token MongoDB'ye kaydedildi")
+        user_id = token_info.get("user_id")
+        if not user_id:
+            raise ValueError("user_id missing from token_info")
+        token_info['_id'] = user_id
+        collection.replace_one({"_id": user_id}, token_info, upsert=True)
+        if set_current:
+            collection.update_one(
+                {"_id": CURRENT_USER_KEY},
+                {"$set": {"user_id": user_id}},
+                upsert=True
+            )
+            self.current_user = user_id
+        logger.info(f"Token MongoDB'ye kaydedildi: {user_id}")
 
     def _is_token_expired(self, token_info: Dict) -> bool:
         """Token süresi dolmuş mu kontrol eder"""
@@ -92,7 +117,8 @@ class SpotifyAuthManager:
             try:
                 new_token = self.oauth.refresh_access_token(old_token['refresh_token'])
                 new_token = self._add_metadata(new_token)
-                self._save_token(new_token)
+                new_token['user_id'] = old_token.get('user_id')
+                self._save_token(new_token, set_current=True)
                 logger.info("Token başarıyla yenilendi")
                 return new_token
             except Exception as e:

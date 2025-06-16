@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from tenacity import retry, wait_exponential, stop_after_attempt
 from fastapi.responses import RedirectResponse
 from functools import lru_cache
+import spotipy
 
 # Dahili Modüller
 from playlist_creator import PlaylistCreator
@@ -22,7 +23,8 @@ from data_store import (
     load_analysis,
     save_user_tracks,
     save_playlist_records,
-    check_mongo_connection
+    check_mongo_connection,
+    clear_user_analyses
 )
 from workflow import (
     create_playlists,
@@ -113,9 +115,12 @@ def start_auth():
 @app.get("/auth/callback")
 def auth_callback(code: str):
     try:
-        token_info = auth_manager.oauth.get_access_token(code)  # as_dict kaldırıldı
+        token_info = auth_manager.oauth.get_access_token(code)
         token_info = auth_manager._add_metadata(token_info)
-        auth_manager._save_token(token_info)
+        sp = spotipy.Spotify(auth=token_info['access_token'])
+        user_id = sp.me().get('id')
+        token_info['user_id'] = user_id
+        auth_manager._save_token(token_info, set_current=True)
 
         return RedirectResponse(
             url=os.getenv(
@@ -145,75 +150,6 @@ async def health_check():
     except Exception as e:
         return ApiResponseFormatter.error(e)
 
-# --- Analiz Başlat ---
-@app.post("/analyze", status_code=status.HTTP_202_ACCEPTED)
-@retry(**SPOTIFY_RETRY_CONFIG)
-async def analyze_playlist(request: AnalysisRequest = Body(...)):
-    logger.info(f"Playlist creation request received: {request.dict()}")
-    try:
-        sp = get_spotify_client()
-        playlist = smart_request_with_retry(
-            sp.playlist,
-            request.playlist_id,
-            fields="name,owner,tracks.total"
-        )
-
-        all_track_ids = []
-        offset = 0
-        total = playlist['tracks']['total']
-
-        while offset < total:
-            results = smart_request_with_retry(
-                sp.playlist_tracks,
-                request.playlist_id,
-                limit=100,
-                offset=offset,
-                fields="items(track(id,name,artists))"
-            )
-            batch_ids = [
-                item['track']['id']
-                for item in results['items']
-                if item.get('track') and item['track'].get('id')
-            ]
-            all_track_ids.extend(batch_ids)
-            offset += len(results['items'])
-
-        cached_tracks = []
-        uncached_ids = all_track_ids
-        if not request.force_refresh:
-            cached_tracks = get_cached_tracks(all_track_ids)
-            cached_ids = [t['_id'] for t in cached_tracks]
-            uncached_ids = [tid for tid in all_track_ids if tid not in cached_ids]
-
-        fetched_features = []
-        for chunk in chunk_list(uncached_ids, 100):
-            response = smart_request_with_retry(sp.audio_features, chunk)
-            if response:
-                fetched_features += [f for f in response if f]
-
-        cache_tracks(fetched_features)
-
-        analysis_data = {
-            "playlist_id": request.playlist_id,
-            "playlist_name": playlist['name'],
-            "owner": playlist['owner']['display_name'],
-            "tracks": {
-                "total": total,
-                "analyzed": len(cached_tracks) + len(fetched_features)
-            },
-            "timestamp": datetime.utcnow().isoformat()
-        }
-
-        analysis_id = save_analysis(analysis_data)
-
-        return ApiResponseFormatter.success(
-            {"analysis_id": analysis_id},
-            status_code=status.HTTP_202_ACCEPTED
-        )
-
-    except Exception as e:
-        logger.error(f"Analiz hatası: {str(e)}", exc_info=True)
-        return ApiResponseFormatter.error(e)
 
 @app.post("/analyze-liked", status_code=status.HTTP_202_ACCEPTED)
 @retry(**SPOTIFY_RETRY_CONFIG)
@@ -367,6 +303,16 @@ async def list_user_analyses():
     except Exception as e:
         return ApiResponseFormatter.error(e)
 
+
+@app.delete("/user/analyses")
+async def clear_history():
+    try:
+        user_id = get_spotify_client().me()["id"]
+        deleted = clear_user_analyses(user_id)
+        return ApiResponseFormatter.success({"deleted": deleted})
+    except Exception as e:
+        return ApiResponseFormatter.error(e)
+
 @app.get("/user/profile")
 async def get_user_profile():
     """Return basic profile information for the logged in user."""
@@ -379,6 +325,27 @@ async def get_user_profile():
             "images": profile.get("images"),
         }
         return ApiResponseFormatter.success(data)
+    except Exception as e:
+        return ApiResponseFormatter.error(e)
+
+
+@app.get("/users")
+async def list_saved_users():
+    try:
+        users = auth_manager.list_users()
+        return ApiResponseFormatter.success({"users": users, "current": auth_manager.current_user})
+    except Exception as e:
+        return ApiResponseFormatter.error(e)
+
+
+@app.post("/users/switch/{user_id}")
+async def switch_active_user(user_id: str):
+    try:
+        if not auth_manager.set_current_user(user_id):
+            raise HTTPException(status_code=404, detail="User not found")
+        return ApiResponseFormatter.success({"active_user": user_id})
+    except HTTPException as he:
+        raise he
     except Exception as e:
         return ApiResponseFormatter.error(e)
 

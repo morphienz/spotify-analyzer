@@ -189,6 +189,9 @@ class GenreFinder:
 
                     if isinstance(genres, list) and genres:
                         genre_map.setdefault(primary, []).append(tid)
+                    else:
+                        primary = "unknown"
+                        genre_map.setdefault("unknown", []).append(tid)
 
                     cache_batch.append({
                         "id": tid,
