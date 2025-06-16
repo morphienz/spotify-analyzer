@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../config.js";
 
 function PlaylistButton({
   analysisId,
@@ -30,7 +31,7 @@ function PlaylistButton({
     };
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/playlists`, {
+      const res = await fetch(`${API_BASE_URL}/playlists`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)

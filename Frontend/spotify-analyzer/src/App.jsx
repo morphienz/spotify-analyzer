@@ -7,8 +7,7 @@ import PageWrapper from './components/PageWrapper.jsx';
 import './index.css';
 import { UserContext } from './UserContext.jsx';
 import { logout as apiLogout, fetchUserProfile } from './api.js';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+import { API_BASE_URL } from './config.js';
 
 const slogans = [
   "Türlerin ötesine geç!",

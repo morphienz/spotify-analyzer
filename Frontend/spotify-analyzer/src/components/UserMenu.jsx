@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { logout as apiLogout } from "../api.js";
 import { UserContext } from "../UserContext.jsx";
+import { API_BASE_URL } from "../config.js";
 
 function UserMenu() {
   const [open, setOpen] = useState(false);
@@ -45,7 +46,7 @@ function UserMenu() {
     return (
       <button
         onClick={() => {
-          window.location.href = `${import.meta.env.VITE_API_URL}/login`;
+          window.location.href = `${API_BASE_URL}/login`;
         }}
         className="px-4 py-2 bg-green-500 text-black rounded-full"
       >
