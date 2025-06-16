@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserMenu from "../components/UserMenu.jsx";
+import PageWrapper from "../components/PageWrapper.jsx";
 
 function AnalyzePage() {
   const [status, setStatus] = useState("Hazırlanıyor...");
@@ -55,7 +56,7 @@ function AnalyzePage() {
           style={{ width: `${progress}%` }}
         ></div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }
 

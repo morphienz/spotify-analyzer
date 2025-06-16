@@ -183,25 +183,46 @@ class RateLimiter:
         self.timestamps = []
 
     def __call__(self, func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            now = time.time()
-            self.timestamps = [
-                t for t in self.timestamps
-                if now - t < self.period
-            ]
+        if asyncio.iscoroutinefunction(func):
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                now = time.time()
+                self.timestamps = [
+                    t for t in self.timestamps
+                    if now - t < self.period
+                ]
 
-            if len(self.timestamps) >= self.calls:
-                sleep_time = self.period - (now - self.timestamps[0])
-                logger.warning(
-                    f"Rate limit: {sleep_time:.1f}s bekleniyor..."
-                )
-                time.sleep(sleep_time)
+                if len(self.timestamps) >= self.calls:
+                    sleep_time = self.period - (now - self.timestamps[0])
+                    logger.warning(
+                        f"Rate limit: {sleep_time:.1f}s bekleniyor..."
+                    )
+                    await asyncio.sleep(sleep_time)
 
-            self.timestamps.append(time.time())
-            return func(*args, **kwargs)
+                self.timestamps.append(time.time())
+                return await func(*args, **kwargs)
 
-        return wrapper
+            return async_wrapper
+        else:
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                now = time.time()
+                self.timestamps = [
+                    t for t in self.timestamps
+                    if now - t < self.period
+                ]
+
+                if len(self.timestamps) >= self.calls:
+                    sleep_time = self.period - (now - self.timestamps[0])
+                    logger.warning(
+                        f"Rate limit: {sleep_time:.1f}s bekleniyor..."
+                    )
+                    time.sleep(sleep_time)
+
+                self.timestamps.append(time.time())
+                return func(*args, **kwargs)
+
+            return wrapper
 
 
 # --- Health Checks ---

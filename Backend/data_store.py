@@ -230,6 +230,18 @@ def save_user_tracks(user_id: str, tracks: List[Dict]) -> bool:
         logger.error(f"Kullanıcı verisi kaydetme hatası: {str(e)}")
         return False
 
+
+@retry(**MONGO_RETRY_CONFIG)
+def load_user_tracks(user_id: str) -> List[Dict]:
+    """Kullanıcının kaydedilmiş şarkılarını yükler"""
+    try:
+        collection = MongoDBManager().get_collection("user_tracks")
+        cursor = collection.find({"user_id": user_id}, {"_id": 0}).sort("added_at", 1)
+        return list(cursor)
+    except errors.PyMongoError as e:
+        logger.error(f"Kullanıcı verisi yükleme hatası: {str(e)}")
+        return []
+
 @retry(**MONGO_RETRY_CONFIG)
 def save_playlist_records(playlist_data: Dict) -> bool:
     try:

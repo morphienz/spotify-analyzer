@@ -296,7 +296,7 @@ def get_breakdown_for_analysis(analysis_id: str) -> Dict:
     return get_genre_breakdown(analysis["genres"])
 
 
-def get_analysis_details(analysis_id: str) -> Dict[str, List[Dict]]:
+def get_analysis_details(analysis_id: str) -> List[Dict]:
     analysis = load_analysis(analysis_id)
     if not analysis or "genres" not in analysis:
         raise WorkflowError("Analiz veya tür verisi bulunamadı", "details")
@@ -307,18 +307,27 @@ def get_analysis_details(analysis_id: str) -> Dict[str, List[Dict]]:
 
     track_lookup = {t["_id"]: t for t in cached_tracks}
 
-    genre_details = {}
+    # Hangi şarkının hangi türlere ait olduğunu haritalandır
+    track_genres = {tid: [] for tid in track_id_set}
     for genre, track_ids in genre_map.items():
-        genre_details[genre] = [
-            {
-                "id": tid,
-                "name": track_lookup.get(tid, {}).get("name", "Unknown"),
-                "artist": track_lookup.get(tid, {}).get("artist", "Unknown")
-            }
-            for tid in track_ids if tid in track_lookup
-        ]
+        for tid in track_ids:
+            if tid in track_genres:
+                track_genres[tid].append(genre)
 
-    return genre_details
+    # Nihai şarkı listesi
+    track_details = []
+    for tid, genres in track_genres.items():
+        if tid not in track_lookup:
+            continue
+        info = track_lookup[tid]
+        track_details.append({
+            "id": tid,
+            "name": info.get("name", "Unknown"),
+            "artist": info.get("artist", "Unknown"),
+            "genres": genres
+        })
+
+    return track_details
 
 
 def get_filtered_genres(analysis_id: str, excluded_ids: List[str]) -> Dict[str, List[str]]:

@@ -106,7 +106,10 @@ class GenreFinder:
                 timeout=REQUEST_TIMEOUT
             )
             response.raise_for_status()
-            return [tag['name'].lower() for tag in response.json().get('recordings', [{}])[0].get('tags', [])][:3]
+            data = response.json().get('recordings', [])
+            if not data:
+                return []
+            return [tag['name'].lower() for tag in data[0].get('tags', [])][:3]
         except Exception as e:
             logger.warning(f"MusicBrainz verisi alınamadı: {e}")
             return []

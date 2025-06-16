@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import UserMenu from "../components/UserMenu.jsx";
 import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
+import PageWrapper from "../components/PageWrapper.jsx";
 
 function ResultPage() {
   const { analysisId } = useParams();
@@ -41,11 +42,13 @@ function ResultPage() {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/analysis/${analysisId}/details`);
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/analysis/${analysisId}/details`
+        );
         const { data, status } = await res.json();
-        if (status === "success") {
+        if (status === "success" && Array.isArray(data.tracks)) {
           const mapping = {};
-          for (const track of data.tracks || []) {
+          for (const track of data.tracks) {
             for (const genre of track.genres || []) {
               if (!mapping[genre]) mapping[genre] = [];
               mapping[genre].push(track.id);
@@ -201,7 +204,7 @@ function ResultPage() {
           <button
             onClick={handleCreatePlaylist}
             disabled={selectedGenres.length === 0}
-            className={`mt-6 px-6 py-2 font-bold rounded-full ${
+            className={`mt-6 px-6 py-2 font-bold rounded-full transition duration-300 ease-in-out ${
               selectedGenres.length > 0
                 ? "bg-green-500 hover:bg-green-600 text-black"
                 : "bg-gray-600 text-gray-300 cursor-not-allowed"
@@ -212,7 +215,7 @@ function ResultPage() {
 
           <button
             onClick={handleCreateAllPlaylists}
-            className="mt-4 bg-blue-500 hover:bg-blue-600 text-black font-bold py-2 px-6 rounded-full"
+            className="mt-4 bg-blue-500 hover:bg-blue-600 text-black font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out"
           >
             Tüm Şarkılar İçin Playlist Oluştur
           </button>
@@ -223,6 +226,7 @@ function ResultPage() {
         </>
       )}
     </div>
+    </PageWrapper>
   );
 }
 
