@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import UserMenu from "../components/UserMenu.jsx";
 import PageWrapper from "../components/PageWrapper.jsx";
 
 function AnalyzeLiked() {
@@ -57,9 +58,10 @@ function AnalyzeLiked() {
   }, [navigate]);
 
   return (
-    <PageWrapper>
-      <div className="flex flex-col items-center justify-center h-screen text-white bg-black px-4">
-        <div className="text-xl mb-4 text-center">{status}</div>
+    <div className="flex flex-col items-center justify-center h-screen text-white bg-black px-4 relative">
+      <UserMenu />
+      <div className="text-xl mb-4 text-center">{status}</div>
+
 
         <div className="w-full max-w-xl h-4 bg-gray-700 rounded overflow-hidden">
           <div

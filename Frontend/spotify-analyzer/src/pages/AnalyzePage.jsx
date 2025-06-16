@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import UserMenu from "../components/UserMenu.jsx";
 import PageWrapper from "../components/PageWrapper.jsx";
 
 function AnalyzePage() {
@@ -46,15 +47,14 @@ function AnalyzePage() {
   }, [navigate]);
 
   return (
-    <PageWrapper>
-      <div className="flex flex-col items-center justify-center h-screen text-white bg-black">
-        <div className="text-xl mb-4">{status}</div>
-        <div className="w-1/2 h-4 bg-gray-700 rounded">
-          <div
-            className="h-full bg-green-500 rounded transition duration-700"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
+    <div className="flex flex-col items-center justify-center h-screen text-white bg-black relative">
+      <UserMenu />
+      <div className="text-xl mb-4">{status}</div>
+      <div className="w-1/2 h-4 bg-gray-700 rounded">
+        <div
+          className="h-full bg-green-500 rounded transition-all duration-700"
+          style={{ width: `${progress}%` }}
+        ></div>
       </div>
     </PageWrapper>
   );

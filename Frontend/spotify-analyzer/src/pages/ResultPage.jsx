@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import UserMenu from "../components/UserMenu.jsx";
 import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import PageWrapper from "../components/PageWrapper.jsx";
@@ -170,8 +171,8 @@ function ResultPage() {
   };
 
   return (
-    <PageWrapper>
-    <div className="bg-[#121212] text-white min-h-screen flex flex-col items-center py-10 px-4">
+    <div className="bg-[#121212] text-white min-h-screen flex flex-col items-center py-10 px-4 relative">
+      <UserMenu />
       <h1 className="text-3xl font-bold mb-6">Analiz Sonuçları</h1>
 
       {loading ? (

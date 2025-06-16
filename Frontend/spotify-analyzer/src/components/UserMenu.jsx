@@ -1,40 +1,35 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 function UserMenu() {
   const [open, setOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    window.location.href = "/";
-  };
+  useEffect(() => {
+    setLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+  }, []);
+
+  if (!loggedIn) return null;
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="absolute top-4 right-4 text-right">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition duration-300 ease-in-out"
+        className="px-3 py-1 bg-gray-800 text-white rounded"
       >
         ☰
       </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-32 bg-gray-800 rounded-md shadow-lg overflow-hidden z-10"
+      {open && (
+        <div className="mt-2 bg-gray-900 text-white rounded shadow-lg p-2">
+          <Link
+            to="/history"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 hover:bg-gray-700 rounded"
           >
-            <button
-              onClick={handleLogout}
-              className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700 transition duration-300 ease-in-out"
-            >
-              Çıkış Yap
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            Analiz Geçmişi
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

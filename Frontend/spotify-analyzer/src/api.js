@@ -28,28 +28,23 @@ export const createPlaylists = async (analysisId, selectedTracks = {}, excludedT
   }
 };
 
-export const fetchUserProfile = async () => {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/user/profile`, {
-    credentials: "include",
-    mode: "cors",
-  });
-  const data = await response.json();
-  if (!response.ok || data.status === "error") {
-    throw new Error(data.error?.message || "Profil alınamadı.");
-  }
-  return data.data;
-};
+export const fetchUserAnalyses = async () => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/analyses`, {
+      method: "GET",
+      mode: "cors",
+      credentials: "include",
+    });
 
-export const logout = async () => {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
-    method: "POST",
-    credentials: "include",
-    mode: "cors",
-  });
-  const data = await response.json();
-  if (!response.ok || data.status === "error") {
-    throw new Error(data.error?.message || "Çıkış yapılamadı.");
+    const data = await response.json();
+    if (!response.ok || data.status !== "success") {
+      throw new Error(data.detail || data.message || "Analiz geçmişi alınamadı.");
+    }
+
+    return data.data;
+  } catch (err) {
+    console.error("🎯 API history error:", err);
+    throw err;
   }
-  return data.data;
 };
 

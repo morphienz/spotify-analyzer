@@ -65,9 +65,8 @@ function App() {
   };
 
   return (
-    <PageWrapper>
-    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-black to-gray-900 text-white transition-all duration-500">
-      <div className="absolute top-4 right-4">{isLoggedIn && <UserMenu />}</div>
+    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-black to-gray-900 text-white transition-all duration-500 relative">
+      {isLoggedIn && <UserMenu />}
       <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-center h-12">
         <span className="text-green-500">{slogans[currentSlogan]}</span>
       </div>

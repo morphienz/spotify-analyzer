@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import UserMenu from "../components/UserMenu.jsx";
 import PageWrapper from "../components/PageWrapper.jsx";
 
 function AnalyzeOptions() {
@@ -13,8 +14,8 @@ function AnalyzeOptions() {
   };
 
   return (
-    <PageWrapper>
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-black to-gray-900 text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-black to-gray-900 text-white relative">
+      <UserMenu />
       <h1 className="text-3xl font-bold mb-8 text-green-400">Nasıl analiz etmek istersin?</h1>
 
       <div className="flex flex-col gap-6">
