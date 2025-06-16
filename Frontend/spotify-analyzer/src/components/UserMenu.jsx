@@ -27,6 +27,8 @@ function UserMenu() {
       console.error("Logout failed", e);
     } finally {
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userImage");
       navigate("/");
     }
   };
