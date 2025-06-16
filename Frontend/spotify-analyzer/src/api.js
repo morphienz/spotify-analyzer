@@ -1,6 +1,8 @@
+const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
+
 export const createPlaylists = async (analysisId, selectedTracks = {}, excludedTracks = []) => {
   try {
-    const response = await fetch("http://127.0.0.1:8080/playlists", {
+    const response = await fetch(`${API_BASE_URL}/playlists`, {
       method: "POST",
       mode: "cors",
       credentials: "include",
@@ -30,7 +32,7 @@ export const createPlaylists = async (analysisId, selectedTracks = {}, excludedT
 
 export const fetchUserAnalyses = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/analyses`, {
+    const response = await fetch(`${API_BASE_URL}/user/analyses`, {
       method: "GET",
       mode: "cors",
       credentials: "include",
@@ -50,7 +52,7 @@ export const fetchUserAnalyses = async () => {
 
 export const fetchUserProfile = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/profile`, {
+    const response = await fetch(`${API_BASE_URL}/user/profile`, {
       method: "GET",
       mode: "cors",
       credentials: "include",
@@ -79,7 +81,7 @@ export const fetchUserProfile = async () => {
 
 export const logout = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
+    const response = await fetch(`${API_BASE_URL}/logout`, {
       method: "POST",
       mode: "cors",
       credentials: "include",
