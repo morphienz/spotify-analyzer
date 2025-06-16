@@ -328,7 +328,7 @@ def get_analysis_details(analysis_id: str) -> List[Dict]:
             for tid in track_ids if tid in track_lookup
         ]
 
-    return track_details
+    return genre_details
 
 
 def get_filtered_genres(analysis_id: str, excluded_ids: List[str]) -> Dict[str, List[str]]:
