@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import UserMenu from "../components/UserMenu.jsx";
+import PageWrapper from "../components/PageWrapper.jsx";
 
 function AnalyzeLiked() {
   const [status, setStatus] = useState("Hazırlanıyor...");
@@ -56,22 +58,25 @@ function AnalyzeLiked() {
   }, [navigate]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen text-white bg-black px-4">
+    <div className="flex flex-col items-center justify-center h-screen text-white bg-black px-4 relative">
+      <UserMenu />
       <div className="text-xl mb-4 text-center">{status}</div>
 
-      <div className="w-full max-w-xl h-4 bg-gray-700 rounded overflow-hidden">
-        <div
-          className="h-full bg-green-500 rounded transition-all duration-700"
-          style={{ width: `${progress}%` }}
-        ></div>
-      </div>
 
-      {error && (
-        <div className="mt-6 text-red-400 text-center max-w-lg">
-          ⚠️ {error}
+        <div className="w-full max-w-xl h-4 bg-gray-700 rounded overflow-hidden">
+          <div
+            className="h-full bg-green-500 rounded transition duration-700"
+            style={{ width: `${progress}%` }}
+          ></div>
         </div>
-      )}
-    </div>
+
+        {error && (
+          <div className="mt-6 text-red-400 text-center max-w-lg">
+            ⚠️ {error}
+          </div>
+        )}
+      </div>
+    </PageWrapper>
   );
 }
 
