@@ -9,7 +9,7 @@ function UserMenu() {
   const name = localStorage.getItem('userName') || 'Kullanıcı';
   const image =
     localStorage.getItem('userImage') ||
-    'https://via.placeholder.com/32';
+    '/vite.svg';
 
   useEffect(() => {
     const handleClick = (e) => {
