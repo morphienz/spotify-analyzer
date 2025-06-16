@@ -5,6 +5,7 @@ import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import SelectionPanel from "../components/SelectionPanel";
 import PageWrapper from "../components/PageWrapper.jsx";
+import { API_BASE_URL } from "../config.js";
 
 function ResultPage() {
   const { analysisId } = useParams();
@@ -26,7 +27,7 @@ function ResultPage() {
     const fetchBreakdown = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/analysis/${analysisId}/breakdown`,
+          `${API_BASE_URL}/analysis/${analysisId}/breakdown`,
         );
         const { data, status, message } = await res.json();
         if (status === "success") {
@@ -54,7 +55,7 @@ function ResultPage() {
     const fetchDetails = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/analysis/${analysisId}/details`,
+          `${API_BASE_URL}/analysis/${analysisId}/details`,
         );
         const { data, status } = await res.json();
         if (status === "success") {
@@ -108,7 +109,7 @@ function ResultPage() {
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/playlists`, {
+      const res = await fetch(`${API_BASE_URL}/playlists`, {
         method: "POST",
         mode: "cors",
         credentials: "include",
@@ -151,7 +152,7 @@ function ResultPage() {
     setMessage("⏳ Playlistler oluşturuluyor...");
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/playlists/full-auto`,
+        `${API_BASE_URL}/playlists/full-auto`,
         {
           method: "POST",
           headers: {
