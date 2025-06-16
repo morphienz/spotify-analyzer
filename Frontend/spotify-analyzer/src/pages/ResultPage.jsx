@@ -19,7 +19,9 @@ function ResultPage() {
   useEffect(() => {
     const fetchBreakdown = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/analysis/${analysisId}/breakdown`);
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/analysis/${analysisId}/breakdown`,
+        );
         const { data, status, message } = await res.json();
         if (status === "success") {
           const genreList = Object.entries(data).map(([genre, value]) => ({
@@ -45,11 +47,11 @@ function ResultPage() {
     const fetchDetails = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/analysis/${analysisId}/details`
+          `${import.meta.env.VITE_API_URL}/analysis/${analysisId}/details`,
         );
         const { data, status } = await res.json();
         if (status === "success") {
-          setGenreTrackMap(data);
+          setGenreTrackMap(data.tracks);
         }
       } catch (err) {
         console.error("❌ Details fetch error:", err);
@@ -61,15 +63,13 @@ function ResultPage() {
 
   const toggleGenreSelection = (genre) => {
     setSelectedGenres((prev) =>
-      prev.includes(genre)
-        ? prev.filter((g) => g !== genre)
-        : [...prev, genre]
+      prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre],
     );
   };
 
   const toggleExclude = (id) => {
     setExcludedTrackIds((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
     );
   };
 
@@ -111,7 +111,9 @@ function ResultPage() {
       if (data.status === "success") {
         setMessage("✅ Playlist(ler) başarıyla oluşturuldu.");
       } else {
-        setMessage("❌ Playlist oluşturulamadı: " + (data.message || "Bilinmeyen hata"));
+        setMessage(
+          "❌ Playlist oluşturulamadı: " + (data.message || "Bilinmeyen hata"),
+        );
       }
     } catch (err) {
       console.error("❌ Playlist oluşturma hatası:", err);
@@ -122,20 +124,27 @@ function ResultPage() {
   const handleCreateAllPlaylists = async () => {
     setMessage("⏳ Playlistler oluşturuluyor...");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/playlists/full-auto`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/playlists/full-auto`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ analysis_id: analysisId }),
         },
-        body: JSON.stringify({ analysis_id: analysisId })
-      });
+      );
 
       const data = await res.json();
 
       if (res.ok && data.status === "success") {
-        setMessage(`✅ ${data.created_playlists} playlist oluşturuldu. Toplam ${data.total_tracks} şarkı eklendi.`);
+        setMessage(
+          `✅ ${data.created_playlists} playlist oluşturuldu. Toplam ${data.total_tracks} şarkı eklendi.`,
+        );
       } else {
-        throw new Error(data?.detail || data?.message || "Playlist oluşturulamadı.");
+        throw new Error(
+          data?.detail || data?.message || "Playlist oluşturulamadı.",
+        );
       }
     } catch (err) {
       console.error("❌ Otomatik playlist hatası:", err);
@@ -175,68 +184,71 @@ function ResultPage() {
 
   return (
     <PageWrapper>
-    <div className="bg-[#121212] text-white min-h-screen flex flex-col items-center py-10 px-4 relative">
-      <UserMenu />
-      <h1 className="text-3xl font-bold mb-6">Analiz Sonuçları</h1>
+      <div className="bg-[#121212] text-white min-h-screen flex flex-col items-center py-10 px-4 relative">
+        <UserMenu />
+        <h1 className="text-3xl font-bold mb-6">Analiz Sonuçları</h1>
 
-      {loading ? (
-        <p>Yükleniyor...</p>
-      ) : error ? (
-        <p className="text-red-400">{error}</p>
-      ) : genres.length === 0 ? (
-        <p className="text-gray-400">Hiç tür verisi bulunamadı.</p>
-      ) : (
-        <>
-          <div className="w-full max-w-xl">
-            <Pie data={chartData} options={chartOptions} />
-          </div>
-
-          <div className="mt-6">
-            <h2 className="text-lg font-semibold mb-2">Seçilen Türler:</h2>
-            <div className="flex flex-wrap gap-2">
-              {selectedGenres.map((genre) => (
-                <span
-                  key={genre}
-                  className="bg-green-500 text-black px-3 py-1 rounded-full"
-                >
-                  {genre}
-                </span>
-              ))}
+        {loading ? (
+          <p>Yükleniyor...</p>
+        ) : error ? (
+          <p className="text-red-400">{error}</p>
+        ) : genres.length === 0 ? (
+          <p className="text-gray-400">Hiç tür verisi bulunamadı.</p>
+        ) : (
+          <>
+            <div className="w-full max-w-xl">
+              <Pie data={chartData} options={chartOptions} />
             </div>
-          </div>
 
-          <SelectionPanel
-            genres={genreTrackMap}
-            selectedGenres={new Set(selectedGenres)}
-            excludedTrackIds={excludedTrackIds}
-            toggleExclude={toggleExclude}
-          />
+            <div className="mt-6">
+              <h2 className="text-lg font-semibold mb-2">Seçilen Türler:</h2>
+              <div className="flex flex-wrap gap-2">
+                {selectedGenres.map((genre) => (
+                  <span
+                    key={genre}
+                    onClick={() => toggleGenreSelection(genre)}
+                    className="bg-green-500 text-black px-3 py-1 rounded-full cursor-pointer"
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-          <button
-            onClick={handleCreatePlaylist}
-            disabled={selectedGenres.length === 0}
-            className={`mt-6 px-6 py-2 font-bold rounded-full transition duration-300 ease-in-out ${
-              selectedGenres.length > 0
-                ? "bg-green-500 hover:bg-green-600 text-black"
-                : "bg-gray-600 text-gray-300 cursor-not-allowed"
-            }`}
-          >
-            Seçilen Türlerden Playlist Oluştur
-          </button>
+            <SelectionPanel
+              genres={genreTrackMap}
+              selectedGenres={new Set(selectedGenres)}
+              excludedTrackIds={excludedTrackIds}
+              toggleExclude={toggleExclude}
+            />
 
-          <button
-            onClick={handleCreateAllPlaylists}
-            className="mt-4 bg-blue-500 hover:bg-blue-600 text-black font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out"
-          >
-            Tüm Şarkılar İçin Playlist Oluştur
-          </button>
+            <button
+              onClick={handleCreatePlaylist}
+              disabled={selectedGenres.length === 0}
+              className={`mt-6 px-6 py-2 font-bold rounded-full transition duration-300 ease-in-out ${
+                selectedGenres.length > 0
+                  ? "bg-green-500 hover:bg-green-600 text-black"
+                  : "bg-gray-600 text-gray-300 cursor-not-allowed"
+              }`}
+            >
+              Seçilen Türlerden Playlist Oluştur
+            </button>
 
-          {message && (
-            <p className="mt-4 text-yellow-400 text-center text-lg">{message}</p>
-          )}
-        </>
-      )}
-    </div>
+            <button
+              onClick={handleCreateAllPlaylists}
+              className="mt-4 bg-blue-500 hover:bg-blue-600 text-black font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out"
+            >
+              Tüm Şarkılar İçin Playlist Oluştur
+            </button>
+
+            {message && (
+              <p className="mt-4 text-yellow-400 text-center text-lg">
+                {message}
+              </p>
+            )}
+          </>
+        )}
+      </div>
     </PageWrapper>
   );
 }
